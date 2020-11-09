@@ -1,3 +1,6 @@
+# stripttc.c originates from:
+# https://github.com/fontforge/fontforge/blob/master/contrib/fonttools/stripttc.c
+
 default: stripttc.so
 
 stripttc.so: stripttc.o
