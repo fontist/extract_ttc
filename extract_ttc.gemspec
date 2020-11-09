@@ -3,8 +3,8 @@ require_relative "lib/extract_ttc/version"
 Gem::Specification.new do |spec|
   spec.name          = "extract_ttc"
   spec.version       = ExtractTtc::VERSION
-  spec.authors       = ["Ribose Inc.", "Alexey Morozov"]
-  spec.email         = ["operations@ribose.com", "alexey.morozov.is@gmail.com"]
+  spec.authors       = ["Ribose Inc."]
+  spec.email         = ["operations@ribose.com"]
 
   spec.summary       = "Extract TTC file to TTF files"
   spec.description   = "Extract font collection to separate font files"

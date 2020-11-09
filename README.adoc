@@ -1,0 +1,121 @@
+= ExtractTtc: Ruby gem to extract TTF from TTC
+
+== Purpose
+
+The gem lets you extract individual TrueType font files (`.ttf`) from a TrueType Collection file (`.ttc`).
+
+`ExtractTtc` wraps functionality provided by `stripttc.c`, originally from the
+https://github.com/fontforge/fontforge[FontForge project] as an FFI extension.
+
+Specifically, `stripttc.c` is part of the `contribs` directory of FontForge, which
+is
+https://github.com/fontforge/fontforge/blob/21ad4a18fb3d4becfe566d8215eba4483b0ddc4b/contrib/CMakeLists.txt#L1[assigned]
+the
+https://github.com/fontforge/fontforge/blob/21ad4a18fb3d4becfe566d8215eba4483b0ddc4b/LICENSE#L12-L57[BSD 3-Clause license].
+
+
+== Installation
+
+Add this line to your application's `Gemfile`:
+
+[source,ruby]
+----
+gem 'extract_ttc'
+----
+
+And then execute:
+
+[source,sh]
+----
+$ bundle install
+----
+
+Or install it yourself as:
+
+[source,sh]
+----
+$ gem install extract_ttc
+----
+
+== Usage
+
+[source,ruby]
+----
+ExtractTtc.extract("path/to/ttc/Helvetica.ttc")
+----
+
+Would extract contained TTF files from TTC to a current directory.
+
+
+== Development
+
+We are following Sandi Metz's Rules for this gem, you can read the
+http://robots.thoughtbot.com/post/50655960596/sandi-metz-rules-for-developers[description of the rules here].
+All new code should follow these
+rules. If you make changes in a pre-existing file that violates these rules you
+should fix the violations as part of your contribution.
+
+=== Setup
+
+Clone the repository:
+
+[source,sh]
+----
+git clone https://github.com/fontist/extract_ttc
+----
+
+Setup your environment:
+
+[source,sh]
+----
+bin/setup
+----
+
+Run the test suite:
+
+[source,sh]
+----
+bundle exec rspec
+----
+
+If any changes are made in the C code, then the extension needs to be recompiled:
+
+[source,sh]
+----
+bundle exec rake recompile
+----
+
+You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to https://rubygems.org[rubygems.org].
+
+
+== Contributing
+
+First, thank you for contributing! We love pull requests from everyone. By
+participating in this project, you hereby grant https://www.ribose.com[Ribose Inc.] the
+right to grant or transfer an unlimited number of non exclusive licenses or
+sub-licenses to third parties, under the copyright covering the contribution
+to use the contribution by all means.
+
+Here are a few technical guidelines to follow:
+
+1. Open an https://github.com/fontist/extract_ttc/issues[issue] to discuss a new feature.
+1. Write tests to support your new feature.
+1. Make sure the entire test suite passes locally and on CI.
+1. Open a Pull Request.
+1. https://github.com/thoughtbot/guides/tree/master/protocol/git#write-a-feature[Squash your commits]
+  after receiving feedback.
+1. Party!
+
+
+== License
+
+This gem is distributed with a BSD 3-Clause license.
+
+`stripttc.c` is obtained from:
+https://github.com/fontforge/fontforge/blob/master/contrib/fonttools/stripttc.c
+
+The BSD 3-Clause licence for `stripttc.c` is provided in `ext/stripttc/LICENSE`.
+
+This gem is developed, maintained and funded by https://www.ribose.com/[Ribose Inc.]
