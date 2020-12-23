@@ -2,37 +2,72 @@ name: release
 
 on:
   push:
-    tags:
-      - 'v*'
+    tags: [ v* ]
+workflow_dispatch:
 
 jobs:
-  release:
-    runs-on: ubuntu-18.04
+  build-native:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     steps:
       - uses: actions/checkout@v1
 
-      - uses: actions/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.6'
-          architecture: 'x64'
+          ruby-version: '2.4'
 
       - run: bundle install --jobs 4 --retry 3
 
-      - run: bin/setup
+      - run: bundle exec rake native gem
 
-      - run: bin/rspec
+      - run: bundle exec rake
 
-      - name: Publish to rubygems.org
-        env:
-          RUBYGEMS_API_KEY: ${{secrets.FONTIST_CI_RUBYGEMS_API_KEY}}
-        run: |
-          gem install gem-release
-          touch ~/.gem/credentials
-          cat > ~/.gem/credentials << EOF
-          ---
-          :rubygems_api_key: ${RUBYGEMS_API_KEY}
-          EOF
-          chmod 0600 ~/.gem/credentials
-          git status
-          gem release
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pkg-${{ matrix.os }}
+          path: pkg
+
+  release:
+    runs-on: ubuntu-18.04
+    needs: build
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: metanorma-ubuntu-latest
+          path: pkg
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: metanorma-windows-latest
+          path: pkg
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: metanorma-macos-latest
+          path: pkg
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.4'
+
+      - run: bundle install --jobs 4 --retry 3
+
+      - run: bundle exec rake gem
+
+      - run: ls -l pkg/
+
+      # - name: Publish to rubygems.org
+      #   env:
+      #     RUBYGEMS_API_KEY: ${{secrets.FONTIST_CI_RUBYGEMS_API_KEY}}
+      #   run: |
+      #     touch ~/.gem/credentials
+      #     cat > ~/.gem/credentials << EOF
+      #     ---
+      #     :rubygems_api_key: ${RUBYGEMS_API_KEY}
+      #     EOF
+      #     chmod 0600 ~/.gem/credentials
+      #     gem push pkg/*.gem
 

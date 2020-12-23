@@ -34,6 +34,6 @@ jobs:
 
       - run: bundle install --jobs 4 --retry 3
 
-      - run: bin/setup
+      - run: bundle exec rake compile
 
-      - run: bin/rspec
+      - run: bundle exec rake
