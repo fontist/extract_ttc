@@ -10,7 +10,9 @@ module ExtractTtc
   class UnknownResultError < Error; end
 
   extend FFI::Library
-  ffi_lib File.expand_path("../ext/stripttc/stripttc.so", __dir__)
+  # NOTE: ffi doesn't support bundles https://github.com/ffi/ffi/issues/42#issuecomment-750031554
+  # NOTE: rake-compiler doesn't support dylib generation https://github.com/rake-compiler/rake-compiler/issues/183
+  ffi_lib FFI::Platform.mac? ? "#{File.dirname(__FILE__)}/stripttc.bundle" : "stripttc"
   attach_function :handlefile, [:string], :int
 
   def self.extract(path)

@@ -1,1 +1,4 @@
-# do nothing, Makefile is already here
+require 'mkmf'
+require 'rbconfig'
+
+create_makefile 'stripttc'
