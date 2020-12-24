@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "ffi", "~> 1.0"
+  spec.add_runtime_dependency "rake-compiler", "~> 1.0"
 
   spec.extensions << "ext/stripttc/extconf.rb"
 end
