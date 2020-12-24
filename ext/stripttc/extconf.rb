@@ -1,8 +1,6 @@
-require 'mkmf'
-require 'rbconfig'
+require "mkmf"
+require "rbconfig"
 
-if RbConfig::CONFIG['host_os'] !~ /darwin|mac os/
-  CONFIG['LDSHARED'] << " -shared"
-end
+CONFIG["LDSHARED"] << " -shared" unless RbConfig::CONFIG["host_os"].match?(/darwin/)
 
-create_makefile 'stripttc'
+create_makefile "stripttc"

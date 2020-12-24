@@ -17,10 +17,10 @@ Gem::PackageTask.new(spec) do |pkg|
 end
 
 Rake::ExtensionTask.new("stripttc", spec) do |ext|
-  ext.lib_dir = 'lib'
+  ext.lib_dir = "lib"
   ext.cross_compile = true
   ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux]
-  ext.cross_compiling do |spec|
-    spec.files.reject! { |path| File.fnmatch?('ext/*', path) }
+  ext.cross_compiling do |s|
+    s.files.reject! { |path| File.fnmatch?("ext/*", path) }
   end
 end
