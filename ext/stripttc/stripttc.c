@@ -11,6 +11,12 @@
 
 #define CHR(ch1,ch2,ch3,ch4) (((ch1)<<24)|((ch2)<<16)|((ch3)<<8)|(ch4))
 
+#ifdef _WIN32
+#define EXPORT_API __declspec(dllexport)
+#else
+#define EXPORT_API 
+#endif
+
 static void putshort(FILE *file,int sval) {
     putc((sval>>8)&0xff,file);
     putc(sval&0xff,file);
@@ -132,7 +138,7 @@ static int handlefont(char *filename,int which,FILE *ttc,int offset) {
     return( 0 );
 }
 
-int handlefile(char *filename) {
+EXPORT_API int handlefile(char *filename) {
     FILE *ttc = fopen(filename,"rb");
     int version, cnt, e, i;
     int *offsets;
