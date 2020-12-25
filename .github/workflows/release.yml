@@ -28,14 +28,12 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: pkg-${{ matrix.os }}
-          path: pkg
+          path: pkg/*.gem
 
   release:
     runs-on: ubuntu-18.04
     needs: pack
     steps:
-      - uses: actions/checkout@v1
-        
       - uses: actions/download-artifact@v2
         with:
           name: pkg-ubuntu-latest
@@ -51,15 +49,9 @@ jobs:
           name: pkg-macos-latest
           path: pkg
 
-      - run: ls -l pkg/
-
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '2.4'
-
-      - run: bundle install --jobs 4 --retry 3
-
-      - run: bundle exec rake gem
 
       - run: ls -l pkg/
 
@@ -73,5 +65,5 @@ jobs:
       #     :rubygems_api_key: ${RUBYGEMS_API_KEY}
       #     EOF
       #     chmod 0600 ~/.gem/credentials
-      #     gem push pkg/*.gem
+      #     for gem in pkg/*.gem; do gem push $gem; done
 
