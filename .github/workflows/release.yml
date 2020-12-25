@@ -36,17 +36,17 @@ jobs:
     steps:
       - uses: actions/download-artifact@v2
         with:
-          name: metanorma-ubuntu-latest
+          name: pkg-ubuntu-latest
           path: pkg
 
       - uses: actions/download-artifact@v2
         with:
-          name: metanorma-windows-latest
+          name: pkg-windows-latest
           path: pkg
 
       - uses: actions/download-artifact@v2
         with:
-          name: metanorma-macos-latest
+          name: pkg-macos-latest
           path: pkg
 
       - uses: ruby/setup-ruby@v1
