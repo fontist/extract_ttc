@@ -50,7 +50,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.4'
+          ruby-version: '2.6'
 
       - run: ls -l pkg/
 
@@ -58,10 +58,11 @@ jobs:
         env:
           RUBYGEMS_API_KEY: ${{secrets.FONTIST_CI_RUBYGEMS_API_KEY}}
         run: |
-          touch ~/.gem/credentials
+          mkdir -p ~/.gem
           cat > ~/.gem/credentials < EOF
           ---
           :rubygems_api_key: ${RUBYGEMS_API_KEY}
           EOF
           chmod 0600 ~/.gem/credentials
-          for gem in pkg/*.gem; do gem push $gem; done
+          gem signin
+          for gem in pkg/*.gem; do gem push -V $gem; done

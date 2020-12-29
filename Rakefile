@@ -16,6 +16,14 @@ spec = Gem::Specification.load("extract_ttc.gemspec")
 Gem::PackageTask.new(spec) do |pkg|
 end
 
+# HACK: Prevent rake-compiler from overriding required_ruby_version,
+# because the shared library here is Ruby-agnostic.
+# See https://github.com/rake-compiler/rake-compiler/issues/153
+module FixRequiredRubyVersion
+  def required_ruby_version=(*); end
+end
+Gem::Specification.prepend(FixRequiredRubyVersion)
+
 Rake::ExtensionTask.new("stripttc", spec) do |ext|
   ext.lib_dir = "lib"
   ext.cross_compile = true
