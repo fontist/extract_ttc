@@ -7,16 +7,23 @@ require "rake/extensiontask"
 
 module ExtractTtc
   class Error < StandardError; end
+
   class ReadFileError < Error; end
+
   class InvalidFileError < Error; end
+
   class WriteFileError < Error; end
+
   class UnknownResultError < Error; end
 
   extend FFI::Library
   # NOTE: ffi doesn't support bundles out of box https://github.com/ffi/ffi/issues/42#issuecomment-750031554
   # NOTE: rake-compiler doesn't support dylib generation https://github.com/rake-compiler/rake-compiler/issues/183
-  lib_name = Rake::ExtensionTask.new("stripttc", Gem::Specification::load("../extract_ttc.gemspec"))
-    .binary(RUBY_PLATFORM)
+  lib_name = if File.exists?(File.join(File.dirname(__FILE__), "stripttc.bundle"))
+               "stripttc.bundle"
+             else
+               "stripttc.so"
+             end
   ffi_lib File.join(File.dirname(__FILE__), lib_name)
   attach_function :handlefile, [:string], :int
 
