@@ -2,9 +2,6 @@ require "extract_ttc/version"
 require "ffi"
 require "tempfile"
 
-require "rubygems"
-require "rake/extensiontask"
-
 module ExtractTtc
   class Error < StandardError; end
 
