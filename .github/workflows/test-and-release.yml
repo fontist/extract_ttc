@@ -1,0 +1,71 @@
+name: test-and-release
+
+on:
+  push:
+    branches: [ master ]
+    tags:     [ 'v*' ]
+  pull_request:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test on Ruby ${{ matrix.ruby }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [ '2.7', '3.0', '3.1' ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        experimental: [ false ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - run: bundle exec rake compile
+
+      - run: bundle exec rake
+
+  pack:
+    runs-on: ${{ matrix.os }}
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            ruby: '2.7'
+          - os: windows-latest
+            ruby: '2.7'
+          - os: windows-latest
+            ruby: '3.1'
+          - os: macos-latest
+            ruby: '2.7'
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - run: bundle exec rake native gem
+
+      - name: Clean repeating packages
+        if: matrix.os != 'ubuntu-latest'
+        run: rm pkg/extract_ttc-$(ruby -I lib -r pngcheck/version -e "puts ExtractTtc::VERSION").gem
+
+      - run: ls pkg/*.gem
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pkg-${{ matrix.os }}-${{ matrix.ruby }}
+          path: pkg/*.gem
