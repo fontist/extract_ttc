@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.description   = "Extract font collection to separate font files"
   spec.homepage      = "https://github.com/fontist/extract_ttc"
   spec.license       = "BSD-3-Clause"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 2.6.0")
 
   spec.metadata["homepage_uri"]    = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/fontist/extract_ttc"
@@ -26,7 +26,14 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "ffi", "~> 1.0"
-  spec.add_runtime_dependency "rake-compiler", "~> 1.0"
+
+  spec.add_development_dependency "bundler", "~> 2.0"
+  spec.add_development_dependency "rake", "~> 13"
+  spec.add_development_dependency "rake-compiler", "~> 1"
+  spec.add_development_dependency "rspec", "~> 3.0"
+  spec.add_development_dependency "rubocop", "~> 1.5"
+  spec.add_development_dependency "rubocop-rails", "~> 2.9"
+  spec.add_development_dependency "rubocop-performance", "~> 1.10"
 
   spec.extensions << "ext/stripttc/extconf.rb"
 end
