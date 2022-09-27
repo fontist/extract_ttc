@@ -36,5 +36,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop-rails", "~> 2.9"
 
   spec.extensions << "ext/stripttc/extconf.rb"
-  spec.metadata["rubygems_mfa_required"] = "true"
+  spec.metadata["rubygems_mfa_required"] = "false"
 end

@@ -34,8 +34,10 @@ jobs:
 
       - run: bundle exec rake
 
-  pack:
+  package:
+    name: Package gem
     runs-on: ${{ matrix.os }}
+    if: contains(github.ref, 'refs/tags/v')
     needs: test
     strategy:
       fail-fast: false
@@ -59,13 +61,41 @@ jobs:
 
       - run: bundle exec rake native gem
 
-      - name: Clean repeating packages
+      - name: Clean repeating package
         if: matrix.os != 'ubuntu-latest'
-        run: rm pkg/extract_ttc-$(ruby -I lib -r pngcheck/version -e "puts ExtractTtc::VERSION").gem
-
-      - run: ls pkg/*.gem
+        run: rm pkg/extract_ttc-$(ruby -I lib -r extract_ttc/version -e "puts ExtractTtc::VERSION").gem
 
       - uses: actions/upload-artifact@v2
         with:
-          name: pkg-${{ matrix.os }}-${{ matrix.ruby }}
+          name: pkg
           path: pkg/*.gem
+
+  release:
+    name: Release gem
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/tags/v')
+    needs: package
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: pkg
+        path: pkg
+
+    - name: Publish to rubygems.org
+      env:
+        RUBYGEMS_API_KEY: ${{secrets.FONTIST_CI_RUBYGEMS_API_KEY}}
+      run: |
+        mkdir -p ~/.gem
+        touch ~/.gem/credentials
+        cat > ~/.gem/credentials << EOF
+        ---
+        :rubygems_api_key: ${RUBYGEMS_API_KEY}
+        EOF
+        chmod 0600 ~/.gem/credentials
+        gem signin
+        mkdir tmp
+        for gem in pkg/*.gem; do gem push -V $gem; done
+
+#        for gem in pkg/*.gem; do echo "gem push -V $gem"; done
