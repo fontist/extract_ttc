@@ -1,0 +1,101 @@
+name: test-and-release
+
+on:
+  push:
+    branches: [ master ]
+    tags:     [ 'v*' ]
+  pull_request:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test on Ruby ${{ matrix.ruby }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [ '2.7', '3.0', '3.1' ]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        experimental: [ false ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - run: bundle exec rake compile
+
+      - run: bundle exec rake
+
+  package:
+    name: Package gem
+    runs-on: ${{ matrix.os }}
+    if: contains(github.ref, 'refs/tags/v')
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            ruby: '2.7'
+          - os: windows-latest
+            ruby: '2.7'
+          - os: windows-latest
+            ruby: '3.1'
+          - os: macos-latest
+            ruby: '2.7'
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - run: bundle exec rake native gem
+
+      - name: Clean repeating package
+        if: matrix.os != 'ubuntu-latest'
+        run: rm pkg/extract_ttc-$(ruby -I lib -r extract_ttc/version -e "puts ExtractTtc::VERSION").gem
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: pkg
+          path: pkg/*.gem
+
+  release:
+    name: Release gem
+    runs-on: ubuntu-latest
+    if: contains(github.ref, 'refs/tags/v')
+    needs: package
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: pkg
+        path: pkg
+
+    - name: Publish to rubygems.org
+      env:
+        RUBYGEMS_API_KEY: ${{secrets.FONTIST_CI_RUBYGEMS_API_KEY}}
+      run: |
+        mkdir -p ~/.gem
+        touch ~/.gem/credentials
+        cat > ~/.gem/credentials << EOF
+        ---
+        :rubygems_api_key: ${RUBYGEMS_API_KEY}
+        EOF
+        chmod 0600 ~/.gem/credentials
+        gem signin
+        mkdir tmp
+        for gem in pkg/*.gem; do gem push -V $gem; done
+
+#        for gem in pkg/*.gem; do echo "gem push -V $gem"; done

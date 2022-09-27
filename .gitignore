@@ -7,8 +7,8 @@
 /spec/reports/
 /tmp/
 /Gemfile.lock
-/ext/**/*.so
-/ext/**/*.o
+**/*.so
+**/*.o
 
 # remote file cache
 .rubocop-*

@@ -6,9 +6,13 @@ require "rake/extensiontask"
 require "rubygems"
 require "rubygems/package_task"
 
-RSpec::Core::RakeTask.new(:rspec)
+require "rubocop/rake_task"
 
-task default: :rspec
+RSpec::Core::RakeTask.new(:spec)
+RuboCop::RakeTask.new
+
+task default: :spec
+task spec: :compile
 
 spec = Gem::Specification.load("extract_ttc.gemspec")
 
@@ -27,7 +31,7 @@ Gem::Specification.prepend(FixRequiredRubyVersion)
 Rake::ExtensionTask.new("stripttc", spec) do |ext|
   ext.lib_dir = "lib"
   ext.cross_compile = true
-  ext.cross_platform = %w[x86-mingw32 x64-mingw32 x86-linux x86_64-linux]
+  ext.cross_platform = %w[x64-mingw32 x64-mingw-ucrt x86_64-linux x86_64-darwin]
   ext.cross_compiling do |s|
     s.files.reject! { |path| File.fnmatch?("ext/*", path) }
   end
