@@ -10,6 +10,11 @@ concurrency:
   group: '${{ github.workflow }}-${{ github.job }}-${{ github.head_ref || github.ref_name }}'
   cancel-in-progress: true
 
+env:
+  BUNDLER_VER: 2.3.22
+# Forcing bundler version to ensure that it is consistent everywhere and does not cause
+# bundler gem reinstalls
+
 jobs:
   test:
     name: Test on Ruby ${{ matrix.ruby }} ${{ matrix.os }}
@@ -28,42 +33,29 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+          bundler: ${{ env.BUNDLER_VER }}
           bundler-cache: true
 
       - run: bundle exec rake compile
 
       - run: bundle exec rake
 
-  package:
-    name: Package gem
-    runs-on: ${{ matrix.os }}
-    if: contains(github.ref, 'refs/tags/v')
-    needs: test
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-latest
-            ruby: '2.7'
-          - os: windows-latest
-            ruby: '2.7'
-          - os: windows-latest
-            ruby: '3.1'
-          - os: macos-latest
-            ruby: '2.7'
+  package-1:
+    name: Package native extensions gem (linux-gnu, windows, macos)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true
+          ruby-version: 3.1
+          bundler: ${{ env.BUNDLER_VER }}
+          bundler-cache: false
+# bundler-cache:true breaks rake-compiler-dock logic
 
-      - run: bundle exec rake native gem
+      - run: bundle install --jobs 4 --retry 3
 
-      - name: Clean repeating package
-        if: matrix.os != 'ubuntu-latest'
-        run: rm pkg/extract_ttc-$(ruby -I lib -r extract_ttc/version -e "puts ExtractTtc::VERSION").gem
+      - run: bundle exec rake gem:parallel
 
       - uses: actions/upload-artifact@v2
         with:
@@ -74,7 +66,7 @@ jobs:
     name: Release gem
     runs-on: ubuntu-latest
     if: contains(github.ref, 'refs/tags/v')
-    needs: package
+    needs: [test, package-1]
     steps:
     - uses: actions/checkout@v3
 
