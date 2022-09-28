@@ -40,7 +40,7 @@ jobs:
 
       - run: bundle exec rake
 
-  package-1:
+  package-rake-compiler-dock:
     name: Package native extensions gem (linux-gnu, windows, macos)
     runs-on: ubuntu-latest
     steps:
@@ -62,11 +62,39 @@ jobs:
           name: pkg
           path: pkg/*.gem
 
+  package-alpine:
+    name: Package on alpine-latest
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:latest
+
+    steps:
+    - name: Install packages
+      run: apk --no-cache --upgrade add git ruby-dev build-base autoconf
+
+    - name: Configure git
+      run: git config --global --add safe.directory $(pwd)
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - run: |
+        gem install bundler:${{ env.BUNDLER_VER }}
+        bundle install
+        bundle exec rake native gem
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: pkg
+        path: pkg/*.gem
+
   release:
     name: Release gem
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/tags/v')
-    needs: [test, package-1]
+#    if: contains(github.ref, 'refs/tags/v')
+    needs: [test, package-rake-compiler-dock, package-alpine]
     steps:
     - uses: actions/checkout@v3
 
@@ -88,6 +116,6 @@ jobs:
         chmod 0600 ~/.gem/credentials
         gem signin
         mkdir tmp
-        for gem in pkg/*.gem; do gem push -V $gem; done
 
-#        for gem in pkg/*.gem; do echo "gem push -V $gem"; done
+        for gem in pkg/*.gem; do echo "gem push -V $gem"; done
+#        for gem in pkg/*.gem; do gem push -V $gem; done

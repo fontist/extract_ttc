@@ -31,7 +31,7 @@ spec = Gem::Specification.load("extract_ttc.gemspec")
 ext_thru_rc_dock = %w[x86_64-linux aarch64-linux] +
   %w[x64-mingw32 x64-mingw-ucrt x86_64-darwin arm64-darwin]
 
-ext_thru_qu_dock = %w[x86_64-linux-musl aarch64-linux-musl]
+ext_thru_musl_cc = %w[x86_64-linux-musl aarch64-linux-musl]
 
 # add your default gem packing task
 Gem::PackageTask.new(spec) do |pkg|
@@ -48,7 +48,7 @@ Gem::Specification.prepend(FixRequiredRubyVersion)
 exttask = Rake::ExtensionTask.new("stripttc", spec) do |ext|
   ext.lib_dir = "lib"
   ext.cross_compile = true
-  ext.cross_platform = ext_thru_rc_dock + ext_thru_qu_dock
+  ext.cross_platform = ext_thru_rc_dock + ext_thru_musl_cc
   ext.cross_compiling do |s|
     s.files.reject! { |path| File.fnmatch?("ext/*", path) }
   end
@@ -64,7 +64,7 @@ namespace "gem" do
     RCD
   end
 
-  desc "build native gems"
+  desc "build native gems with rake-compiler-dock"
   task "native" => "cache" do
     ext_thru_rc_dock.each do |plat|
       RakeCompilerDock.sh <<~RCD, platform: plat
@@ -78,7 +78,7 @@ end
 
 namespace "gem" do
   ext_thru_rc_dock.each do |plat|
-    desc "Build all native binary gems in parallel"
+    desc "Build native gems with rake-compiler-dock in parallel"
     multitask "parallel" => plat
 
     desc "Build the native gem for #{plat}"
@@ -90,6 +90,19 @@ namespace "gem" do
           pkg/#{exttask.gem_spec.full_name}-#{plat}.gem \
           #{R_CC_V}
       RCD
+    end
+  end
+
+  ext_thru_musl_cc.each do |plat|
+    desc "Define the gem task to build on the #{plat} platform (binary gem)"
+    task plat do
+      s = spec.dup
+      s.platform = Gem::Platform.new(plat)
+      s.files += Dir.glob("lib/extract_ttc/*.{dll,so,dylib}")
+      s.extensions = []
+
+      task = Gem::PackageTask.new(s)
+      task.define
     end
   end
 end
