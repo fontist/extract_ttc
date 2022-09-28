@@ -12,20 +12,20 @@ concurrency:
 
 env:
   BUNDLER_VER: 2.3.22
-# Forcing bundler version to ensure that it is consistent everywhere and does not cause
-# bundler gem reinstalls
+# Forcing bundler version to ensure that it is consistent everywhere and
+# does not cause bundler gem reinstalls
+# bundler/rubygems 2.3.22 is a minimal requirement to support gnu/musl differentiation
+# https://github.com/rubygems/rubygems/pull/4488
 
 jobs:
   test:
     name: Test on Ruby ${{ matrix.ruby }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
         ruby: [ '2.7', '3.0', '3.1' ]
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        experimental: [ false ]
 
     steps:
       - uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
       - run: bundle exec rake
 
   package-rake-compiler-dock:
-    name: Package native extensions gem (linux-gnu, windows, macos)
+    name: Package native extensions (linux-gnu, windows, macos)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -62,10 +62,38 @@ jobs:
           name: pkg
           path: pkg/*.gem
 
-  package-alpine:
-    name: Package on alpine-latest
-    strategy:
-      fail-fast: false
+  package-linux-musl-aarch64:
+    name: Package linux-musl-aarch64 extension
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+# https://github.com/marketplace/actions/run-on-architecture
+    - uses: uraimo/run-on-arch-action@v2
+      name: Run commands
+      id: runcmd
+      with:
+        arch: aarch64
+        distro: alpine_latest
+        # Not required, but speeds up builds
+        githubToken: ${{ github.token }}
+        dockerRunArgs: --volume "${PWD}:/_a"
+        install: apk --no-cache --upgrade add git ruby-dev build-base autoconf
+        run: |
+          cd /_a
+          gem install bundler:${{ env.BUNDLER_VER }}
+          bundle install
+          bundle exec rake native gem
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: pkg
+        path: pkg/*.gem
+
+  package-linux-musl-x86_64:
+    name: Package linux-musl-x86_64 extension
     runs-on: ubuntu-latest
     container:
       image: alpine:latest
@@ -80,10 +108,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - run: |
+    - name: Install dependencies
+      run: |
         gem install bundler:${{ env.BUNDLER_VER }}
         bundle install
-        bundle exec rake native gem
+
+    - name: Build native extension
+      run:  bundle exec rake native gem
 
     - uses: actions/upload-artifact@v2
       with:
@@ -93,8 +124,8 @@ jobs:
   release:
     name: Release gem
     runs-on: ubuntu-latest
-#    if: contains(github.ref, 'refs/tags/v')
-    needs: [test, package-rake-compiler-dock, package-alpine]
+    if: contains(github.ref, 'refs/tags/v')
+    needs: [test, package-rake-compiler-dock, package-linux-musl-x86_64, package-linux-musl-aarch64]
     steps:
     - uses: actions/checkout@v3
 
@@ -116,6 +147,6 @@ jobs:
         chmod 0600 ~/.gem/credentials
         gem signin
         mkdir tmp
+        for gem in pkg/*.gem; do gem push -V $gem; done
 
-        for gem in pkg/*.gem; do echo "gem push -V $gem"; done
-#        for gem in pkg/*.gem; do gem push -V $gem; done
+#        for gem in pkg/*.gem; do echo "gem push -V $gem"; done
