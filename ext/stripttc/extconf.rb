@@ -1,6 +1,6 @@
-require "mkmf"
 require "rbconfig"
-
-CONFIG["LDSHARED"] << " -shared" unless RbConfig::CONFIG["host_os"].match?(/darwin/)
-
+require "mkmf"
 create_makefile "stripttc"
+
+File.write("Makefile",
+            File.open("Makefile",&:read).gsub("--no-as-needed","--as-needed"))
