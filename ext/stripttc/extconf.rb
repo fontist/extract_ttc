@@ -1,6 +1,5 @@
 require "rbconfig"
 require "mkmf"
 create_makefile "stripttc"
-
-File.write("Makefile",
-            File.open("Makefile",&:read).gsub("--no-as-needed","--as-needed"))
+m = File.read("Makefile").gsub("--no-as-needed", "--as-needed")
+File.write("Makefile", m)
