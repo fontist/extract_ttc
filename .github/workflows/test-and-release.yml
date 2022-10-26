@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@master
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler: ${{ env.BUNDLER_VER }}
@@ -44,9 +44,9 @@ jobs:
     name: Package native extensions (linux-gnu, windows, macos)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
 
-      - uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@master
         with:
           ruby-version: 3.1
           bundler: ${{ env.BUNDLER_VER }}
@@ -57,7 +57,7 @@ jobs:
 
       - run: bundle exec rake gem:parallel
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: pkg
           path: pkg/*.gem
@@ -87,7 +87,7 @@ jobs:
           bundle install
           bundle exec rake native gem
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: pkg
         path: pkg/*.gem
@@ -116,7 +116,7 @@ jobs:
     - name: Build native extension
       run:  bundle exec rake native gem
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: pkg
         path: pkg/*.gem
@@ -124,12 +124,12 @@ jobs:
   release:
     name: Release gem
     runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/tags/v')
+#    if: contains(github.ref, 'refs/tags/v')
     needs: [test, package-rake-compiler-dock, package-linux-musl-x86_64, package-linux-musl-aarch64]
     steps:
     - uses: actions/checkout@v3
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: pkg
         path: pkg
