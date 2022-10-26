@@ -33,10 +33,6 @@ ext_thru_rc_dock = %w[x86_64-linux aarch64-linux] +
 
 ext_thru_musl_cc = %w[x86_64-linux-musl aarch64-linux-musl]
 
-# add your default gem packing task
-Gem::PackageTask.new(spec) do |pkg|
-end
-
 # HACK: Prevent rake-compiler from overriding required_ruby_version,
 # because the shared library here is Ruby-agnostic.
 # See https://github.com/rake-compiler/rake-compiler/issues/153

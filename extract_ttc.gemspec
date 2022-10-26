@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.description   = "Extract font collection to separate font files"
   spec.homepage      = "https://github.com/fontist/extract_ttc"
   spec.license       = "BSD-3-Clause"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.6.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
 
   spec.metadata["homepage_uri"]    = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/fontist/extract_ttc"
@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir.chdir(__dir__) do
     `git ls-files -z`
-      .split("\x0").reject { |f| f.match(%r{^(.github|test|spec|features)/}) }
+      .split("\x0").reject { |f| f.match(%r{^(bin|.github|test|spec|features)/}) }
   end
 
   spec.bindir        = "exe"
