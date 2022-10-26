@@ -147,6 +147,6 @@ jobs:
         chmod 0600 ~/.gem/credentials
         gem signin
         mkdir tmp
-        for gem in pkg/*.gem; do echo "gem push -V $gem"; done
+        for gem in pkg/*.gem; do gem push -V $gem; done
 
-#        for gem in pkg/*.gem; do gem push -V $gem; done
+#        for gem in pkg/*.gem; do echo "gem push -V $gem"; done
