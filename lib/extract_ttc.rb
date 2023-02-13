@@ -16,19 +16,14 @@ module ExtractTtc
   extend FFI::Library
   # NOTE: ffi doesn't support bundles out of box https://github.com/ffi/ffi/issues/42#issuecomment-750031554
   # NOTE: rake-compiler doesn't support dylib generation https://github.com/rake-compiler/rake-compiler/issues/183
+  lib_subdir = RUBY_VERSION.split(".").first(2).join(".")
+  macos_binary = "stripttc.bundle"
   lib_name = if File.exist?(
-    File.join(
-      File.dirname(__FILE__),
-      RUBY_VERSION.split(".").first(2).join("."),
-      "stripttc.bundle",
-    ),
-  ) || File.exist?(
-    File.join(
-      File.dirname(__FILE__),
-      "stripttc.bundle",
-    ),
+    File.join(File.dirname(__FILE__), lib_subdir, macos_binary),
   )
-               "stripttc.bundle"
+               File.join(lib_subdir, macos_binary)
+             elsif File.exist?(File.join(File.dirname(__FILE__), macos_binary))
+               macos_binary
              else
                "stripttc.so"
              end
