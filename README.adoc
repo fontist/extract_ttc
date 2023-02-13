@@ -1,3 +1,8 @@
+image:https://img.shields.io/gem/v/extract_ttc.svg["Gem Version", link="https://rubygems.org/gems/extract_ttc"]
+image:https://github.com/fontist/extract_ttc/workflows/test-and-release/badge.svg["Build Status", link="https://github.com/fontist/extract_ttc/actions?workflow=test-and-release"]
+// image:https://codeclimate.com/github/metanorma/extract_ttc/badges/gpa.svg["Code Climate", link="https://codeclimate.com/github/fontist/extract_ttc"]
+image:https://img.shields.io/github/issues-pr-raw/fontist/extract_ttc.svg["Pull Requests", link="https://github.com/fontist/extract_ttc/pulls"]
+
 = ExtractTtc: Ruby gem to extract TTF from TTC
 
 == Purpose
