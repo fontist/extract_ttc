@@ -20,7 +20,9 @@ rescue LoadError
 end
 # -- Allow rake-compiler-dock configuration without dev. dependencies
 
-R_CC_V = "RUBY_CC_VERSION=3.1.0:3.0.0:2.7.0".freeze
+# Keep only one version in R_CC_V because libstripttc doesn depende on libruby
+# we don't need different variation per each minor version of ruby
+R_CC_V = "RUBY_CC_VERSION=2.7.0".freeze
 bundler_ver = ENV["BUNDLER_VER"] || "2.3.22"
 
 task default: :spec
@@ -28,8 +30,14 @@ task spec: :compile
 
 spec = Gem::Specification.load("extract_ttc.gemspec")
 
-ext_thru_rc_dock = %w[x86_64-linux aarch64-linux] +
-  %w[x64-mingw32 x64-mingw-ucrt x86_64-darwin arm64-darwin]
+ext_thru_rc_dock = %w[
+  x86_64-linux
+  aarch64-linux
+  x64-mingw32
+  x64-mingw-ucrt
+  x86_64-darwin
+  arm64-darwin
+]
 
 ext_thru_musl_cc = %w[x86_64-linux-musl aarch64-linux-musl]
 
