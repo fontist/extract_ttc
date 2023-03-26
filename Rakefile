@@ -37,6 +37,9 @@ ext_thru_rc_dock = %w[
   arm64-darwin
 ]
 
+# TODO automate build with:
+# "rbsys/x86_64-linux-musl:latest" - for x86_64-linux-musl
+# "*" - find/create image for aarch64-linux-musl
 ext_thru_musl_cc = %w[x86_64-linux-musl aarch64-linux-musl]
 
 # HACK: Prevent rake-compiler from overriding required_ruby_version,
@@ -66,37 +69,24 @@ namespace "gem" do
     RCD
   end
 
-  desc "build native gems with rake-compiler-dock"
-  task "native" => "cache" do
-    ext_thru_rc_dock.each do |plat|
-      if plat == "x64-mingw32"
-        ruby_cc_version = "3.0.0"
-      end
-      RakeCompilerDock.sh <<~RCD, platform: plat
-        gem install bundler:#{bundler_ver} --no-document &&
-        bundle install --local &&
-        bundle exec rake native:#{plat} gem RUBY_CC_VERSION=#{ruby_cc_version}
-      RCD
-    end
-  end
-end
-
-namespace "gem" do
   ext_thru_rc_dock.each do |plat|
     desc "Build native gems with rake-compiler-dock in parallel"
     multitask "parallel" => plat
 
     desc "Build the native gem for #{plat}"
     task plat => "cache" do
-      if plat == "x64-mingw32"
-        ruby_cc_version = "3.0.0"
-      end
+      ruby_cc_ver = if plat == "x64-mingw32"
+                      "3.0.0"
+                    else
+                      ruby_cc_version
+                    end
+
       RakeCompilerDock.sh <<~RCD, platform: plat
         gem install bundler:#{bundler_ver} --no-document &&
         bundle install --local &&
         bundle exec rake native:#{plat} \
           pkg/#{exttask.gem_spec.full_name}-#{plat}.gem \
-          RUBY_CC_VERSION=#{ruby_cc_version}
+          RUBY_CC_VERSION=#{ruby_cc_ver}
       RCD
     end
   end
