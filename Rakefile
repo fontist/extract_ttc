@@ -20,9 +20,7 @@ rescue LoadError
 end
 # -- Allow rake-compiler-dock configuration without dev. dependencies
 
-# Keep only one version in R_CC_V because libstripttc doesn depende on libruby
-# we don't need different variation per each minor version of ruby
-R_CC_V = "RUBY_CC_VERSION=3.1.0".freeze
+ruby_cc_version = "3.1.0"
 bundler_ver = ENV["BUNDLER_VER"] || "2.3.22"
 
 task default: :spec
@@ -71,10 +69,13 @@ namespace "gem" do
   desc "build native gems with rake-compiler-dock"
   task "native" => "cache" do
     ext_thru_rc_dock.each do |plat|
+      if plat == "x64-mingw32"
+        ruby_cc_version = "3.0.0"
+      end
       RakeCompilerDock.sh <<~RCD, platform: plat
         gem install bundler:#{bundler_ver} --no-document &&
         bundle install --local &&
-        bundle exec rake native:#{plat} gem #{R_CC_V}
+        bundle exec rake native:#{plat} gem RUBY_CC_VERSION=#{ruby_cc_version}
       RCD
     end
   end
@@ -87,12 +88,15 @@ namespace "gem" do
 
     desc "Build the native gem for #{plat}"
     task plat => "cache" do
+      if plat == "x64-mingw32"
+        ruby_cc_version = "3.0.0"
+      end
       RakeCompilerDock.sh <<~RCD, platform: plat
         gem install bundler:#{bundler_ver} --no-document &&
         bundle install --local &&
         bundle exec rake native:#{plat} \
           pkg/#{exttask.gem_spec.full_name}-#{plat}.gem \
-          #{R_CC_V}
+          RUBY_CC_VERSION=#{ruby_cc_version}
       RCD
     end
   end
