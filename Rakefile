@@ -22,7 +22,7 @@ end
 
 # Keep only one version in R_CC_V because libstripttc doesn depende on libruby
 # we don't need different variation per each minor version of ruby
-R_CC_V = "RUBY_CC_VERSION=2.7.0".freeze
+R_CC_V = "RUBY_CC_VERSION=3.1.0".freeze
 bundler_ver = ENV["BUNDLER_VER"] || "2.3.22"
 
 task default: :spec
