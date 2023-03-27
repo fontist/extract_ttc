@@ -28,13 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "bundler", "~> 2.3", ">= 2.3.22"
   spec.add_runtime_dependency "ffi", "~> 1.0"
   spec.add_runtime_dependency "rake", "~> 13"
-  spec.add_runtime_dependency "rake-compiler", "~> 1.2"
-  spec.add_runtime_dependency "rake-compiler-dock", "~> 1.2"
-
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "rubocop", "~> 1.5"
-  spec.add_development_dependency "rubocop-performance", "~> 1.10"
-  spec.add_development_dependency "rubocop-rails", "~> 2.9"
 
   spec.extensions << "ext/stripttc/extconf.rb"
   spec.metadata["rubygems_mfa_required"] = "false"
