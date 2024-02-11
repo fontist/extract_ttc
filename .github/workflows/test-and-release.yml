@@ -35,7 +35,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@master
         with:
@@ -52,7 +52,7 @@ jobs:
     name: Package native extensions (linux-gnu, windows, macos)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ruby/setup-ruby@master
         with:
@@ -67,7 +67,7 @@ jobs:
 
       - run: bundle exec rake build
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: pkg
           path: pkg/*.gem
@@ -78,7 +78,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
 # https://github.com/marketplace/actions/run-on-architecture
     - uses: uraimo/run-on-arch-action@v2
@@ -97,7 +97,7 @@ jobs:
           bundle install
           bundle exec rake native gem
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: pkg
         path: pkg/*.gem
@@ -116,7 +116,7 @@ jobs:
       run: git config --global --add safe.directory $(pwd)
 
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install dependencies
       run: |
@@ -126,7 +126,7 @@ jobs:
     - name: Build native extension
       run:  bundle exec rake native gem
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: pkg
         path: pkg/*.gem
@@ -137,9 +137,9 @@ jobs:
     if: contains(github.ref, 'refs/tags/v')
     needs: [test, package-rake-compiler-dock, package-linux-musl-x86_64, package-linux-musl-aarch64]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         name: pkg
         path: pkg
