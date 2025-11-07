@@ -1,0 +1,15 @@
+module ExtractTtc
+  module Models
+    class TrueTypeCollectionHeader
+      attr_reader tag: String
+
+      attr_reader version: Integer
+
+      attr_reader num_fonts: Integer
+
+      attr_reader font_offsets: Array[Integer]
+
+      def initialize: (tag: String, version: Integer, num_fonts: Integer, font_offsets: Array[Integer]) -> void
+    end
+  end
+end

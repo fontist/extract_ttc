@@ -1,0 +1,17 @@
+module ExtractTtc
+  module Models
+    class ValidationResult
+      attr_reader valid: bool
+
+      attr_reader errors: Array[String]
+
+      def initialize: (?valid: bool, ?errors: Array[String]) -> void
+
+      def valid?: () -> bool
+
+      def invalid?: () -> bool
+
+      def add_error: (String message) -> ValidationResult
+    end
+  end
+end

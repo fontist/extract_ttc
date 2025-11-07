@@ -1,0 +1,17 @@
+module ExtractTtc
+  module Models
+    class FontData
+      attr_reader offset_table: TrueTypeFontOffsetTable
+
+      attr_reader table_directory: Array[TableDirectoryEntry]
+
+      attr_reader table_data: Hash[String, String]
+
+      def initialize: (offset_table: TrueTypeFontOffsetTable, table_directory: Array[TableDirectoryEntry], table_data: Hash[String, String]) -> void
+
+      def head_table_entry: () -> TableDirectoryEntry?
+
+      def table_by_tag: (String tag) -> TableDirectoryEntry?
+    end
+  end
+end

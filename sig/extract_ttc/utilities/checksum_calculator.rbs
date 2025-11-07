@@ -1,0 +1,13 @@
+module ExtractTtc
+  module Utilities
+    class ChecksumCalculator
+      def self.calculate_file_checksum: (String file_path) -> Integer
+
+      def self.calculate_adjustment: (Integer file_checksum) -> Integer
+
+      private
+
+      def self.calculate_checksum_from_io: (IO io) -> Integer
+    end
+  end
+end

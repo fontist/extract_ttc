@@ -1,126 +1,760 @@
+= ExtractTTC: extract TTF fonts from TTC collections
+
 image:https://img.shields.io/gem/v/extract_ttc.svg["Gem Version", link="https://rubygems.org/gems/extract_ttc"]
 image:https://github.com/fontist/extract_ttc/workflows/test-and-release/badge.svg["Build Status", link="https://github.com/fontist/extract_ttc/actions?workflow=test-and-release"]
-// image:https://codeclimate.com/github/metanorma/extract_ttc/badges/gpa.svg["Code Climate", link="https://codeclimate.com/github/fontist/extract_ttc"]
 image:https://img.shields.io/github/issues-pr-raw/fontist/extract_ttc.svg["Pull Requests", link="https://github.com/fontist/extract_ttc/pulls"]
-
-= ExtractTtc: Ruby gem to extract TTF from TTC
 
 == Purpose
 
-The gem lets you extract individual TrueType font files (`.ttf`) from a TrueType Collection file (`.ttc`).
+`ExtractTTC` is a pure Ruby gem that extracts individual TrueType font files
+(`.ttf`) from TrueType Collection files (`.ttc`).
 
-`ExtractTtc` wraps functionality provided by `stripttc.c`, originally from the
-https://github.com/fontforge/fontforge[FontForge project] as an FFI extension.
 
-Specifically, `stripttc.c` is part of the `contribs` directory of FontForge, which
-is
-https://github.com/fontforge/fontforge/blob/21ad4a18fb3d4becfe566d8215eba4483b0ddc4b/contrib/CMakeLists.txt#L1[assigned]
-the
-https://github.com/fontforge/fontforge/blob/21ad4a18fb3d4becfe566d8215eba4483b0ddc4b/LICENSE#L12-L57[BSD 3-Clause license].
+== Features
 
+* <<simple-extraction,Simple extraction API>>
+* <<cli-usage,Command-line interface>>
+* <<custom-output,Custom output directories>>
+* <<declarative-structures,Declarative BinData structures>>
+* <<domain-objects,Object-oriented domain objects>>
+* <<error-handling,Comprehensive error handling>>
+* <<type-safety,Type safety with RBS signatures>>
+* <<high-performance,High performance binary parsing>>
+
+== Architecture
+
+ExtractTTC uses a model-driven architecture where domain objects
+inherit from `BinData::Record` and handle their own binary I/O through
+declarative structure definitions.
+
+.ExtractTTC architecture overview
+[source]
+----
+┌──────────────────────────────────────────────────────────────┐
+│                        Client Code                           │
+│                 ExtractTtc.extract(path)                     │
+└────────────────────────┬─────────────────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────────────────┐
+│                   Simple Extraction API                      │
+│      1. Read TTC (TrueTypeCollection.read via BinData)       │
+│      2. Extract fonts (ttc.extract_fonts)                    │
+│      3. Write TTFs (font.to_file via BinData)                │
+└──┬────────────┬──────────────┬───────────────────────────────┘
+   │            │              │
+   ▼            ▼              ▼
+┌─────────────┐ ┌─────────────┐ ┌────────────┐
+│TrueType     │ │TrueType     │ │Utilities   │
+│Collection   │ │Font         │ │            │
+│(BinData::   │ │(BinData::   │ │            │
+│ Record)     │ │ Record)     │ │            │
+└──────┬──────┘ └──────┬──────┘ └────────────┘
+       │               │
+ Declarative     Declarative
+   Structure       Structure
+  Definition      Definition
+       │               │
+       ▼               ▼
+  ┌─────────┐    ┌─────────┐
+  │BinData  │    │BinData  │
+  │Parsing  │    │Writing  │
+  └─────────┘    └─────────┘
+----
+
+.Core domain model relationships
+[source]
+----
+TrueTypeCollection (Model)
+├── tag (Value: String) = "ttcf"
+├── major_version (Value: Integer)
+├── minor_version (Value: Integer)
+├── num_fonts (Value: Integer)
+└── font_offsets (Array<Integer>)
+     │
+     └──> Maps to TrueTypeFont instances
+            │
+            ├── TrueTypeFont (Model)
+            │   ├── offset_table (Model)
+            │   │   ├── scaler_type (Value: Integer)
+            │   │   ├── num_tables (Value: Integer)
+            │   │   └── search_range (Value: Integer)
+            │   └── table_directory (Array<TableEntry>)
+            │       └── TableEntry (Model)
+            │           ├── tag (Value: String)
+            │           ├── checksum (Value: Integer)
+            │           ├── offset (Value: Integer)
+            │           └── length (Value: Integer)
+            └── (Recursive pattern for each font)
+----
 
 == Installation
 
-Add this line to your application's `Gemfile`:
+Add this line to your application's Gemfile:
 
 [source,ruby]
 ----
-gem 'extract_ttc'
+gem "extract_ttc"
 ----
 
 And then execute:
 
-[source,sh]
+[source,shell]
 ----
-$ bundle install
+bundle install
 ----
 
 Or install it yourself as:
 
-[source,sh]
+[source,shell]
 ----
-$ gem install extract_ttc
+gem install extract_ttc
 ----
 
-== Usage
+[[cli-usage]]
+== Command-line interface
+
+=== General
+
+ExtractTTC provides a command-line interface for extracting fonts from
+TTC files without writing code. The CLI is built using Thor and follows
+standard Unix conventions for options and arguments.
+
+The command-line interface is particularly useful for:
+
+* Quick one-off extractions
+* Shell scripts and automation
+* CI/CD pipelines
+* Interactive exploration of TTC files
+
+=== Basic extraction
+
+Extract all fonts from a TTC file to the current directory.
+
+Syntax:
+
+[source,shell]
+----
+extract_ttc extract FILE <1>
+----
+<1> The `extract` command with the input TTC file path.
+
+Where,
+
+`FILE`:: The path to the input TrueType Collection file (`.ttc`).
+
+.Extract fonts to current directory
+[example]
+====
+[source,shell]
+----
+extract_ttc extract fonts/Helvetica.ttc
+
+# Output:
+# Successfully extracted 6 font(s):
+#   - Helvetica_00.ttf
+#   - Helvetica_01.ttf
+#   - Helvetica_02.ttf
+#   - Helvetica_03.ttf
+#   - Helvetica_04.ttf
+#   - Helvetica_05.ttf
+----
+
+This extracts all fonts from the TTC file and creates TTF files in the
+current directory with sequential numbering.
+====
+
+=== Extract to specific directory
+
+Specify an output directory for the extracted font files.
+
+Syntax:
+
+[source,shell]
+----
+extract_ttc extract FILE -o OUTPUT_DIR <1>
+----
+<1> The `extract` command with custom output directory.
+
+Where,
+
+`FILE`:: The path to the input TrueType Collection file (`.ttc`).
+`OUTPUT_DIR`:: The directory where extracted TTF files will be created.
+
+.Extract to custom directory
+[example]
+====
+[source,shell]
+----
+extract_ttc extract fonts/Helvetica.ttc -o output/fonts
+
+# Output:
+# Successfully extracted 6 font(s):
+#   - output/fonts/Helvetica_00.ttf
+#   - output/fonts/Helvetica_01.ttf
+#   - output/fonts/Helvetica_02.ttf
+#   - output/fonts/Helvetica_03.ttf
+#   - output/fonts/Helvetica_04.ttf
+#   - output/fonts/Helvetica_05.ttf
+----
+
+The output directory is created automatically if it does not exist.
+====
+
+=== Verbose output
+
+Enable detailed output showing the extraction process.
+
+Syntax:
+
+[source,shell]
+----
+extract_ttc extract FILE -v <1>
+extract_ttc extract FILE --verbose <2>
+----
+<1> Short form of the verbose option.
+<2> Long form of the verbose option.
+
+Where,
+
+`FILE`:: The path to the input TrueType Collection file (`.ttc`).
+
+.Extract with verbose output
+[example]
+====
+[source,shell]
+----
+extract_ttc extract fonts/Helvetica.ttc -v
+
+# Output:
+# Extracting fonts from fonts/Helvetica.ttc...
+# Successfully extracted 6 font(s):
+#   - Helvetica_00.ttf
+#   - Helvetica_01.ttf
+#   - Helvetica_02.ttf
+#   - Helvetica_03.ttf
+#   - Helvetica_04.ttf
+#   - Helvetica_05.ttf
+----
+
+Verbose mode provides additional information about the extraction
+process.
+====
+
+=== Getting help
+
+View help for the extract command.
+
+Syntax:
+
+[source,shell]
+----
+extract_ttc help extract <1>
+extract_ttc extract --help <2>
+----
+<1> Display help using the help command.
+<2> Display help using the --help flag.
+
+.View command help
+[example]
+====
+[source,shell]
+----
+extract_ttc help extract
+
+# Output:
+# Usage:
+#   extract_ttc extract FILE
+#
+# Options:
+#   -o, [--output-dir=OUTPUT_DIR]  # Output directory for TTF files
+#   -v, [--verbose]                # Enable verbose output
+#
+# Extract TTF files from a TTC file
+----
+
+The help output shows all available options and their descriptions.
+====
+
+[[simple-extraction]]
+== Simple extraction API
+
+=== General
+
+The simple extraction API provides a single method to extract all fonts
+from a TrueType Collection file with minimal configuration. This is the
+recommended approach for most use cases, as it handles all the
+complexity of reading TTC structures, extracting individual fonts, and
+writing TTF files.
+
+=== Extract all fonts to current directory
+
+The simplest way to extract all fonts from a TTC file is to provide
+just the input file path.
+
+Syntax:
 
 [source,ruby]
 ----
-ExtractTtc.extract("path/to/ttc/Helvetica.ttc")
+ExtractTtc.extract(path) → Array<String> <1>
+----
+<1> The `extract` method with input file path only.
+
+Where,
+
+`path`:: The path to the input TrueType Collection file (`.ttc`).
+
+Returns an array of output file paths for the extracted TTF files.
+
+.Extract fonts to current directory
+[example]
+====
+[source,ruby]
+----
+require "extract_ttc"
+
+# Extract all fonts from TTC file to current directory
+output_files = ExtractTtc.extract("fonts/Helvetica.ttc")
+# => ["Helvetica_00.ttf", "Helvetica_01.ttf", "Helvetica_02.ttf"]
+
+puts "Extracted #{output_files.size} fonts"
+output_files.each { |file| puts "  - #{file}" }
 ----
 
-Would extract contained TTF files from TTC to a current directory.
+This extracts all fonts and creates TTF files in the current directory
+with names like `Helvetica_00.ttf`, `Helvetica_01.ttf`, etc.
+====
+
+[[custom-output]]
+== Custom output directories
+
+=== General
+
+For organized file management, the extraction API supports specifying a
+custom output directory. This is useful when you want to organize
+extracted fonts in a specific location or maintain a clean directory
+structure.
+
+The output directory will be created automatically if it does not exist.
+
+=== Extract to specific directory
+
+Specify a custom output directory using the `output_dir` parameter.
+
+Syntax:
+
+[source,ruby]
+----
+ExtractTtc.extract(path, output_dir: directory) → Array<String> <1>
+----
+<1> The `extract` method with custom output directory.
+
+Where,
+
+`path`:: The path to the input TrueType Collection file (`.ttc`).
+`directory`:: The path to the output directory for extracted TTF files.
+
+Returns an array of output file paths for the extracted TTF files.
+
+.Extract to custom directory
+[example]
+====
+[source,ruby]
+----
+require "extract_ttc"
+
+# Extract to specific directory
+output_files = ExtractTtc.extract(
+  "fonts/MyFont.ttc",
+  output_dir: "output/fonts"
+)
+# => ["output/fonts/MyFont_00.ttf", "output/fonts/MyFont_01.ttf"]
+
+# Directory is created automatically if it doesn't exist
+output_files.each { |file| puts "Created: #{file}" }
+----
+
+The output directory `output/fonts` is created automatically if it does
+not exist, and all extracted fonts are placed there.
+====
+
+
+[[domain-objects]]
+== Object-oriented domain objects
+
+=== General
+
+ExtractTTC follows object-oriented design principles where domain
+objects encapsulate both data and behavior. The core domain objects are
+`TrueTypeCollection` and `TrueTypeFont`, which inherit from
+`BinData::Record` to gain automatic binary I/O capabilities while
+maintaining clean domain APIs.
+
+This approach ensures that objects know their own structure and can
+handle their own persistence, leading to maintainable and
+self-documenting code.
+
+=== Using TrueTypeCollection objects
+
+The `TrueTypeCollection` class represents a TTC file and provides
+methods to read the collection and extract individual fonts.
+
+.Working with TrueTypeCollection objects
+[example]
+====
+[source,ruby]
+----
+require "extract_ttc"
+
+# Open TTC file and read with BinData
+File.open("fonts/Helvetica.ttc", "rb") do |io|
+  # Parse TTC structure automatically via BinData
+  ttc = ExtractTtc::TrueTypeCollection.read(io)
+
+  # Access TTC metadata
+  puts "TTC Tag: #{ttc.tag}"
+  puts "Version: #{ttc.major_version}.#{ttc.minor_version}"
+  puts "Number of fonts: #{ttc.num_fonts}"
+
+  # Extract fonts as TrueTypeFont objects
+  fonts = ttc.extract_fonts(io)
+  puts "Extracted #{fonts.size} font objects"
+end
+----
+
+The `TrueTypeCollection.read` method automatically parses the binary
+TTC file structure using BinData, and the `extract_fonts` method
+returns an array of `TrueTypeFont` objects.
+====
+
+=== Using TrueTypeFont objects
+
+The `TrueTypeFont` class represents an individual TTF file and provides
+methods to write the font to a file.
+
+.Working with TrueTypeFont objects
+[example]
+====
+[source,ruby]
+----
+require "extract_ttc"
+
+File.open("fonts/Helvetica.ttc", "rb") do |io|
+  ttc = ExtractTtc::TrueTypeCollection.read(io)
+  fonts = ttc.extract_fonts(io)
+
+  # Write each font to file
+  fonts.each_with_index do |font, index|
+    output_path = "output/font_#{index}.ttf"
+
+    # Access font metadata
+    puts "Font #{index}:"
+    puts "  Scaler type: 0x#{font.scaler_type.to_s(16)}"
+    puts "  Number of tables: #{font.num_tables}"
+
+    # Write font to file using BinData
+    font.to_file(output_path)
+    puts "  Wrote: #{output_path}"
+  end
+end
+----
+
+Each `TrueTypeFont` object encapsulates the complete font data and can
+write itself to a file in the correct TTF binary format.
+====
+
+[[error-handling]]
+== Comprehensive error handling
+
+=== General
+
+ExtractTTC defines specific error types for different failure
+scenarios, allowing applications to handle errors appropriately. All
+errors inherit from `ExtractTtc::Error`, making it easy to catch all
+gem-related errors if desired.
+
+The error types provide clear, actionable messages that help diagnose
+issues with input files, invalid formats, or output operations.
+
+=== Error types
+
+The gem defines the following error hierarchy:
+
+.Error type hierarchy
+[source]
+----
+ExtractTtc::Error (base class)
+├── ExtractTtc::ReadFileError
+├── ExtractTtc::InvalidFileError
+└── ExtractTtc::WriteFileError
+----
+
+`ExtractTtc::Error`:: Base error class for all gem-related errors.
+`ExtractTtc::ReadFileError`:: Raised when the input file cannot be
+read (e.g., file not found, permission denied).
+`ExtractTtc::InvalidFileError`:: Raised when the file is not a valid
+TTC file (e.g., wrong format, corrupted data).
+`ExtractTtc::WriteFileError`:: Raised when output files cannot be
+written (e.g., permission denied, disk full).
+
+=== Handling extraction errors
+
+Applications can catch specific error types to handle different failure
+scenarios appropriately.
+
+.Error handling example
+[example]
+====
+[source,ruby]
+----
+require "extract_ttc"
+
+begin
+  output_files = ExtractTtc.extract("fonts/example.ttc")
+  puts "Successfully extracted #{output_files.size} fonts"
+rescue ExtractTtc::ReadFileError => e
+  puts "File not found or cannot be read: #{e.message}"
+  exit 1
+rescue ExtractTtc::InvalidFileError => e
+  puts "Not a valid TTC file: #{e.message}"
+  exit 2
+rescue ExtractTtc::WriteFileError => e
+  puts "Cannot write output files: #{e.message}"
+  exit 3
+rescue ExtractTtc::Error => e
+  puts "Extraction failed: #{e.message}"
+  exit 4
+end
+----
+
+This handles each error type separately, allowing appropriate recovery
+or reporting for different failure scenarios.
+====
+
+=== Catching all gem errors
+
+To catch all gem-related errors, rescue `ExtractTtc::Error`.
+
+.Catch all gem errors
+[example]
+====
+[source,ruby]
+----
+require "extract_ttc"
+
+begin
+  ExtractTtc.extract("fonts/example.ttc")
+rescue ExtractTtc::Error => e
+  # Handle any gem-related error
+  puts "Extraction failed: #{e.message}"
+  puts "Error type: #{e.class.name}"
+end
+----
+
+This catches all errors raised by the gem, including any future error
+types that may be added.
+====
+
+[[type-safety]]
+== Type safety with RBS signatures
+
+=== General
+
+ExtractTTC includes comprehensive RBS type signatures in the `sig/`
+directory, providing static type checking capabilities for applications
+using the gem. The type signatures cover all public APIs and domain
+objects.
+
+Type signatures help catch type-related errors during development and
+provide better IDE support for autocomplete and inline documentation.
+
+=== Using type signatures with Steep
+
+The gem can be type-checked using Steep, a static type checker for
+Ruby.
+
+.Type checking with Steep
+[example]
+====
+[source,shell]
+----
+# Install Steep
+gem install steep
+
+# Type check the gem
+steep check
+
+# Type check your application using the gem
+steep check --steep-file Steepfile
+----
+
+Steep will verify that all method calls and variable assignments match
+the type signatures defined in the `sig/` directory.
+====
+
+=== Viewing type signatures
+
+Type signatures are organized to mirror the source code structure.
+
+.Type signature organization
+[source]
+----
+sig/
+├── extract_ttc.rbs                        # Main API signatures
+└── extract_ttc/
+    ├── configuration.rbs
+    ├── true_type_collection.rbs
+    ├── true_type_font.rbs
+    ├── models/
+    │   ├── extraction_result.rbs
+    │   └── validation_result.rbs
+    └── utilities/
+        ├── checksum_calculator.rbs
+        └── output_path_generator.rbs
+----
+
+[[high-performance]]
+== High performance binary parsing
+
+ExtractTTC achieves high performance through BinData's efficient binary
+parsing implementation. The declarative structure definitions compile
+to optimized read/write operations, providing performance equivalent to
+hand-written binary I/O code.
 
 
 == Development
 
-We are following Sandi Metz's Rules for this gem, you can read the
-http://robots.thoughtbot.com/post/50655960596/sandi-metz-rules-for-developers[description of the rules here].
-All new code should follow these
-rules. If you make changes in a pre-existing file that violates these rules you
-should fix the violations as part of your contribution.
+=== General
+
+The development environment uses standard Ruby tooling with RSpec for
+testing and RuboCop for code style enforcement.
 
 === Setup
 
-Clone the repository:
+Clone the repository and set up the development environment.
 
-[source,sh]
+[source,shell]
 ----
 git clone https://github.com/fontist/extract_ttc
-----
-
-Setup your environment:
-
-[source,sh]
-----
+cd extract_ttc
 bin/setup
 ----
 
-Run the test suite:
+This will install dependencies and prepare the development environment.
 
-[source,sh]
+=== Running tests
+
+Run the complete test suite with RSpec.
+
+[source,shell]
 ----
+# Run all tests
 bundle exec rspec
+
+# Run with verbose output
+bundle exec rspec --format documentation
+
+# Run specific test file
+bundle exec rspec spec/extract_ttc/true_type_collection_spec.rb
+
+# Run tests for a component
+bundle exec rspec spec/extract_ttc/utilities/
 ----
 
-If any changes are made in the C code, then the extension needs to be recompiled:
+=== Test organization
 
-[source,sh]
+Tests are organized to mirror the source code structure, with one RSpec
+file per class.
+
+.Test directory structure
+[source]
 ----
-bundle exec rake recompile
+spec/
+├── extract_ttc_spec.rb                 # Main API tests
+├── spec_helper.rb
+├── extract_ttc/
+│   ├── configuration_spec.rb
+│   ├── true_type_collection_spec.rb
+│   ├── true_type_font_spec.rb
+│   ├── models/
+│   │   ├── extraction_result_spec.rb
+│   │   └── validation_result_spec.rb
+│   └── utilities/
+│       ├── checksum_calculator_spec.rb
+│       └── output_path_generator_spec.rb
+└── fixtures/
+    └── Helvetica.ttc                   # Test fixture files
 ----
 
-You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+=== Development console
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to https://rubygems.org[rubygems.org].
+Run an interactive console for experimentation.
 
+[source,shell]
+----
+bin/console
+----
+
+This opens an IRB session with the gem loaded.
+
+=== Installing locally
+
+Install the gem onto your local machine for testing.
+
+[source,shell]
+----
+bundle exec rake install
+----
+
+=== Code style
+
+Follow these coding guidelines:
+
+* Follow object-oriented design principles
+* Use declarative structures with BinData for binary formats
+* Maintain clear separation of concerns
+* One class per file
+* Comprehensive tests for all classes
+* Clear documentation with examples
+
+=== Releasing
+
+To release a new version:
+
+. Update the version number in
+link:lib/extract_ttc/version.rb[`version.rb`]
+. Run `bundle exec rake release`
+
+This will create a git tag for the version, push git commits and tags,
+and push the `.gem` file to https://rubygems.org[rubygems.org].
 
 == Contributing
 
-First, thank you for contributing! We love pull requests from everyone. By
-participating in this project, you hereby grant https://www.ribose.com[Ribose Inc.] the
-right to grant or transfer an unlimited number of non exclusive licenses or
-sub-licenses to third parties, under the copyright covering the contribution
-to use the contribution by all means.
+First, thank you for contributing! We love pull requests from everyone.
+By participating in this project, you hereby grant
+https://www.ribose.com[Ribose Inc.] the right to grant or transfer an
+unlimited number of non-exclusive licenses or sub-licenses to third
+parties, under the copyright covering the contribution to use the
+contribution by all means.
 
 Here are a few technical guidelines to follow:
 
-1. Open an https://github.com/fontist/extract_ttc/issues[issue] to discuss a new feature.
-1. Write tests to support your new feature.
-1. Make sure the entire test suite passes locally and on CI.
-1. Open a Pull Request.
-1. https://github.com/thoughtbot/guides/tree/master/protocol/git#write-a-feature[Squash your commits]
-  after receiving feedback.
-1. Party!
-
+. Open an https://github.com/fontist/extract_ttc/issues[issue] to
+discuss a new feature.
+. Write tests to support your new feature.
+. Make sure the entire test suite passes locally and on CI.
+. Open a Pull Request.
+. https://github.com/thoughtbot/guides/tree/master/protocol/git#write-a-feature[Squash your commits]
+after receiving feedback.
+. Party!
 
 == License
 
 This gem is distributed with a BSD 3-Clause license.
 
-`stripttc.c` is obtained from:
+The original C implementation was based on `stripttc.c` from the
+FontForge project:
 https://github.com/fontforge/fontforge/blob/master/contrib/fonttools/stripttc.c
 
-The BSD 3-Clause licence for `stripttc.c` is provided in `ext/stripttc/LICENSE`.
-
-This gem is developed, maintained and funded by https://www.ribose.com/[Ribose Inc.]
+This gem is developed, maintained and funded by
+https://www.ribose.com/[Ribose Inc.]

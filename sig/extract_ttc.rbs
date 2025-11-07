@@ -1,0 +1,20 @@
+module ExtractTtc
+  VERSION: String
+
+  class Error < StandardError
+  end
+
+  class ReadFileError < Error
+  end
+
+  class InvalidFileError < Error
+  end
+
+  class WriteFileError < Error
+  end
+
+  class UnknownResultError < Error
+  end
+
+  def self.extract: (String path, ?output_dir: String?, ?config: Configuration?) -> Array[String]
+end
