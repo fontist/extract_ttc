@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-require "bindata"
 require_relative "extract_ttc/version"
 require_relative "extract_ttc/constants"
 require_relative "extract_ttc/configuration"
 
-# Domain objects (OO architecture with BinData)
+# Domain objects (binary data objects)
 require_relative "extract_ttc/true_type_collection"
 require_relative "extract_ttc/true_type_font"
 
@@ -55,70 +54,49 @@ module ExtractTtc
   # @example Extract fonts to specific directory
   #   ExtractTtc.extract("Helvetica.ttc", output_dir: "/tmp/fonts")
   def self.extract(path, output_dir: nil, config: nil)
-    File.open(path, "rb") do |file|
-      # Read TTC file using BinData
-      ttc = TrueTypeCollection.read(file)
+    ensure_output_directory_exists(output_dir)
 
-      # Extract fonts (needs IO to read table data)
+    File.open(path, "rb") do |file|
+      ttc = TrueTypeCollection.read(file)
       fonts = ttc.extract_fonts(file)
 
-      # Write each font to file
       fonts.map.with_index do |font, index|
-        output_path = generate_output_path(path, index, output_dir, config)
+        output_path = Utilities::OutputPathGenerator.generate(
+          path, index, output_dir: output_dir || config&.output_directory
+        )
         font.to_file(output_path)
         output_path
       end
     end
-  rescue Errno::ENOENT => e
-    raise ReadFileError, "Could not open file: #{e.message}"
-  rescue RuntimeError => e
-    if e.message.include?("unexpected end of file") ||
-        e.message.include?("Invalid TTC") ||
-        e.message.include?("expected")
-      raise InvalidFileError, "File does not look like a ttc file"
-    else
-      raise InvalidFileError, "Invalid TTC file: #{e.message}"
-    end
-  rescue IOError => e
-    # BinData throws IOError with "End of file reached" for empty/invalid files
-    if e.message.include?("End of file")
-      raise InvalidFileError, "File does not look like a ttc file"
-    else
-      raise WriteFileError, "Failed to open output file: #{e.message}"
-    end
+  rescue Errno::ENOENT
+    raise ReadFileError, "Could not open file: #{path}"
   rescue Errno::EACCES => e
     raise WriteFileError, "Failed to open output file: #{e.message}"
-  rescue StandardError => e
-    # Catch any other validation errors from BinData
-    if e.message.include?("expected")
-      raise InvalidFileError, "File does not look like a ttc file"
-    else
-      raise
-    end
+  rescue IOError, RuntimeError, StandardError => e
+    raise invalid_file?(e) ? invalid_file_error : write_file_error(e)
   end
 
-  # Generate output path for extracted font
-  #
-  # @param input_path [String] Input TTC file path
-  # @param index [Integer] Font index
-  # @param output_dir [String, nil] Optional output directory
-  # @param config [Configuration, nil] Optional configuration
-  # @return [String] Output file path
-  # @api private
-  def self.generate_output_path(input_path, index, output_dir, config)
-    configuration = config || Configuration.default
-
-    # Override output directory if provided
-    if output_dir
-      configuration = configuration.merge(output_directory: output_dir)
-    end
-
-    Utilities::OutputPathGenerator.generate(
-      input_path,
-      index,
-      output_dir: configuration.output_directory,
-    )
+  # Check if error indicates invalid/corrupted TTC file
+  def self.invalid_file?(error)
+    error.message.match?(/end of file|expected|Invalid TTC/i)
   end
 
-  private_class_method :generate_output_path
+  def self.invalid_file_error
+    InvalidFileError.new("File does not look like a ttc file")
+  end
+
+  def self.write_file_error(error)
+    WriteFileError.new("Failed to open output file: #{error.message}")
+  end
+
+  def self.ensure_output_directory_exists(output_dir)
+    return unless output_dir
+    return if File.directory?(output_dir)
+
+    require "fileutils"
+    FileUtils.mkdir_p(output_dir)
+  end
+
+  private_class_method :invalid_file?, :invalid_file_error,
+                       :write_file_error, :ensure_output_directory_exists
 end

@@ -52,6 +52,64 @@ RSpec.describe ExtractTtc do
         end
       end
     end
+
+    context "backward compatibility" do
+      it "returns relative filenames for current directory extraction" do
+        in_tmp_dir do |dir|
+          filenames = described_class.extract(ttc_path)
+
+          # Should return just filenames, not full paths
+          expect(filenames.first).to eq("Helvetica_00.ttf")
+          expect(filenames.first).not_to include(File::SEPARATOR)
+
+          # User can join with their own directory
+          full_paths = filenames.map { |filename| File.join(dir, filename) }
+          expect(full_paths.first).to include(dir)
+          expect(File.exist?(full_paths.first)).to be true
+        end
+      end
+
+      it "returns full paths when output_dir is specified" do
+        Dir.mktmpdir do |tmp_dir|
+          output_dir = File.join(tmp_dir, "output")
+          filenames = described_class.extract(ttc_path, output_dir: output_dir)
+
+          # Should return full paths when output_dir is specified
+          expect(filenames.first).to include(output_dir)
+          expect(filenames.first).to include(File::SEPARATOR)
+          expect(File.exist?(filenames.first)).to be true
+        end
+      end
+    end
+
+    context "backward compatibility" do
+      it "returns relative filenames for current directory extraction" do
+        in_tmp_dir do |dir|
+          filenames = described_class.extract(ttc_path)
+
+          # Should return just filenames, not full paths
+          expect(filenames.first).to eq("Helvetica_00.ttf")
+          expect(filenames.first).not_to include(File::SEPARATOR)
+
+          # User can join with their own directory
+          full_paths = filenames.map { |filename| File.join(dir, filename) }
+          expect(full_paths.first).to include(dir)
+          expect(File.exist?(full_paths.first)).to be true
+        end
+      end
+
+      it "returns full paths when output_dir is specified" do
+        Dir.mktmpdir do |tmp_dir|
+          output_dir = File.join(tmp_dir, "output")
+          filenames = described_class.extract(ttc_path, output_dir: output_dir)
+
+          # Should return full paths when output_dir is specified
+          expect(filenames.first).to include(output_dir)
+          expect(filenames.first).to include(File::SEPARATOR)
+          expect(File.exist?(filenames.first)).to be true
+        end
+      end
+    end
   end
 
   def fixture_path(filename)
