@@ -1,0 +1,19 @@
+module ExtractTtc
+  module Models
+    class ExtractionResult
+      attr_reader output_files: Array[String]
+
+      attr_reader success: bool
+
+      attr_reader errors: Array[String]
+
+      def initialize: (?output_files: Array[String], ?success: bool, ?errors: Array[String]) -> void
+
+      def success?: () -> bool
+
+      def failure?: () -> bool
+
+      def add_error: (String message) -> ExtractionResult
+    end
+  end
+end

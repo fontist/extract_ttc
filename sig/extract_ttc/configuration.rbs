@@ -1,0 +1,19 @@
+module ExtractTtc
+  class Configuration
+    attr_accessor output_directory: String
+
+    attr_accessor overwrite_existing: bool
+
+    attr_accessor validate_checksums: bool
+
+    attr_accessor verbose: bool
+
+    def initialize: (?output_directory: String, ?overwrite_existing: bool, ?validate_checksums: bool, ?verbose: bool) -> void
+
+    def self.default: () -> Configuration
+
+    def merge: (Hash[Symbol, untyped] options) -> Configuration
+
+    def to_h: () -> Hash[Symbol, String | bool]
+  end
+end

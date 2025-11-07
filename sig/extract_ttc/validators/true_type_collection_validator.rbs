@@ -1,0 +1,9 @@
+module ExtractTtc
+  module Validators
+    class TrueTypeCollectionValidator
+      def self.validate_header: (Models::TrueTypeCollectionHeader ttc_header) -> Models::ValidationResult
+
+      def self.validate_font_data: (Models::FontData font_data) -> Models::ValidationResult
+    end
+  end
+end

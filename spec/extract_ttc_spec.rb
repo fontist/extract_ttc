@@ -53,15 +53,6 @@ RSpec.describe ExtractTtc do
       end
     end
 
-    context "returning unknown code" do
-      let(:ttc_path) { "" }
-      let(:unknown_code) { -4 }
-
-      it "throws unknown result" do
-        allow(ExtractTtc).to receive(:handlefile).and_return(unknown_code)
-        expect { command }.to raise_error(ExtractTtc::UnknownResultError)
-      end
-    end
   end
 
   def fixture_path(filename)

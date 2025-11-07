@@ -1,0 +1,15 @@
+module ExtractTtc
+  module Models
+    class TableDirectoryEntry
+      attr_reader tag: String
+
+      attr_reader checksum: Integer
+
+      attr_reader offset: Integer
+
+      attr_reader length: Integer
+
+      def initialize: (tag: String, checksum: Integer, offset: Integer, length: Integer) -> void
+    end
+  end
+end

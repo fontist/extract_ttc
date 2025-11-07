@@ -1,0 +1,11 @@
+module ExtractTtc
+  module Utilities
+    class OutputPathGenerator
+      DEFAULT_INDEX_FORMAT: String
+
+      def self.generate: (String input_path, Integer font_index, ?output_dir: String?) -> String
+
+      def self.generate_with_format: (String input_path, Integer font_index, String index_format, ?output_dir: String?) -> String
+    end
+  end
+end

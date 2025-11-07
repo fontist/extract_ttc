@@ -1,0 +1,17 @@
+module ExtractTtc
+  module Models
+    class TrueTypeFontOffsetTable
+      attr_reader sfnt_version: Integer
+
+      attr_reader num_tables: Integer
+
+      attr_reader search_range: Integer
+
+      attr_reader entry_selector: Integer
+
+      attr_reader range_shift: Integer
+
+      def initialize: (sfnt_version: Integer, num_tables: Integer, search_range: Integer, entry_selector: Integer, range_shift: Integer) -> void
+    end
+  end
+end
