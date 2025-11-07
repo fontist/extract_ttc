@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "paint"
+
 module ExtractTtc
   class ExtractCommand
     def initialize(options = {})
@@ -62,24 +64,24 @@ module ExtractTtc
 
     def display_results(output_paths)
       if output_paths.empty?
-        puts "No fonts were extracted."
+        puts Paint["⚠️  No fonts were extracted.", :yellow]
         return
       end
 
-      puts "Successfully extracted #{output_paths.size} font(s):"
+      puts Paint["✅ Successfully extracted #{output_paths.size} font(s):", :green, :bold]
       output_paths.each do |path|
-        puts "  - #{path}"
+        puts "  #{Paint['📄', :cyan]} #{path}"
       end
     end
 
     def display_error(message)
-      warn "Error: #{message}"
+      warn Paint["❌ Error: ", :red] + message
     end
 
     def log_verbose(message)
       return unless @verbose
 
-      puts message
+      puts Paint["ℹ️  ", :white] + message
     end
   end
 end

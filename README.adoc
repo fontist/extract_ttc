@@ -275,6 +275,121 @@ The simple extraction API provides a single method to extract all fonts
 from a TrueType Collection file with minimal configuration. This is the
 recommended approach for most use cases, as it handles all the
 complexity of reading TTC structures, extracting individual fonts, and
+=== List fonts in collection
+
+List all fonts contained in a TTC file without extracting them.
+
+Syntax:
+
+[source,shell]
+----
+extract_ttc ls FILE <1>
+----
+<1> The `ls` command to list fonts in the TTC file.
+
+Where,
+
+`FILE`:: The path to the input TrueType Collection file (`.ttc`).
+
+.List fonts in collection
+[example]
+====
+[source,shell]
+----
+extract_ttc ls fonts/Helvetica.ttc
+
+# Output:
+# 📦 TTC File: fonts/Helvetica.ttc
+#    Fonts: 6
+#
+#   0. 📄 Helvetica_00.ttf
+#   1. 📄 Helvetica_01.ttf
+#   2. 📄 Helvetica_02.ttf
+#   3. 📄 Helvetica_03.ttf
+#   4. 📄 Helvetica_04.ttf
+#   5. 📄 Helvetica_05.ttf
+----
+
+The `ls` command provides a quick way to see what fonts are available
+in a TTC collection before extracting them.
+====
+
+=== Show collection information
+
+Display detailed metadata about a TTC file, including header
+information and font offsets.
+
+Syntax:
+
+[source,shell]
+----
+extract_ttc info FILE <1>
+extract_ttc info FILE -v <2>
+----
+<1> Show basic TTC information.
+<2> Show detailed information including table data for each font.
+
+Where,
+
+`FILE`:: The path to the input TrueType Collection file (`.ttc`).
+
+.Show basic TTC information
+[example]
+====
+[source,shell]
+----
+extract_ttc info fonts/Helvetica.ttc
+
+# Output:
+# ═══ TTC File Information ═══
+#
+# 📦 File: fonts/Helvetica.ttc
+# 💾 Size: 2.24 MB
+#
+# ═══ Header ═══
+# 🏷️  Tag: ttcf
+# 📌 Version: 2.0 (0x20000)
+# 🔢 Number of fonts: 6
+#
+# ═══ Font Offsets ═══
+#   0. Offset:       48 (0x30)
+#   1. Offset:      380 (0x17C)
+#   2. Offset:      712 (0x2C8)
+#   3. Offset:     1044 (0x414)
+#   4. Offset:     1376 (0x560)
+#   5. Offset:     1676 (0x68C)
+----
+
+This displays the TTC file metadata, including the file size, version,
+number of fonts, and their offsets in the file.
+====
+
+.Show detailed font information
+[example]
+====
+[source,shell]
+----
+extract_ttc info fonts/Helvetica.ttc -v
+
+# Output includes above, plus:
+# ═══ Font Details ═══
+#
+# 📝 Font 0:
+#   SFNT version: 0x10000
+#   Number of tables: 20
+#   Tables:
+#     • OS/2     checksum: 0x1047244E offset:     2884 length:       96
+#     • cmap     checksum: 0xEF626C81 offset:  2205772 length:     8040
+#     • glyf     checksum: 0x2B563595 offset:  1393876 length:   267440
+#     • head     checksum: 0xB8ED709D offset:     2416 length:       54
+#     ... (and more tables)
+----
+
+The verbose mode (`-v`) shows detailed information about each font,
+including the SFNT version, number of tables, and a complete list of
+all tables with their checksums, offsets, and lengths.
+====
+
 writing TTF files.
 
 === Extract all fonts to current directory
