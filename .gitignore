@@ -9,9 +9,5 @@
 /tmp/
 /Gemfile.lock
 
-/lib/*.so
-/lib/*.bundle
-/ext/*.o
-
 # remote file cache
 .rubocop-*
