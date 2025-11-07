@@ -68,7 +68,8 @@ module ExtractTtc
         return
       end
 
-      puts Paint["✅ Successfully extracted #{output_paths.size} font(s):", :green, :bold]
+      puts Paint["✅ Successfully extracted #{output_paths.size} font(s):",
+                 :green, :bold]
       output_paths.each do |path|
         puts "  #{Paint['📄', :cyan]} #{path}"
       end
