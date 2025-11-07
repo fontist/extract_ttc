@@ -49,17 +49,7 @@ declarative structure definitions.
 │Collection   │ │Font         │ │            │
 │(BinData::   │ │(BinData::   │ │            │
 │ Record)     │ │ Record)     │ │            │
-└──────┬──────┘ └──────┬──────┘ └────────────┘
-       │               │
- Declarative     Declarative
-   Structure       Structure
-  Definition      Definition
-       │               │
-       ▼               ▼
-  ┌─────────┐    ┌─────────┐
-  │BinData  │    │BinData  │
-  │Parsing  │    │Writing  │
-  └─────────┘    └─────────┘
+└─────────────┘ └─────────────┘ └────────────┘
 ----
 
 .Core domain model relationships
@@ -168,6 +158,8 @@ current directory with sequential numbering.
 
 Specify an output directory for the extracted font files.
 
+The output directory is created automatically if it does not exist.
+
 Syntax:
 
 [source,shell]
@@ -197,8 +189,6 @@ extract_ttc extract fonts/Helvetica.ttc -o output/fonts
 #   - output/fonts/Helvetica_04.ttf
 #   - output/fonts/Helvetica_05.ttf
 ----
-
-The output directory is created automatically if it does not exist.
 ====
 
 === Verbose output
@@ -376,6 +366,68 @@ output_files.each { |file| puts "Created: #{file}" }
 
 The output directory `output/fonts` is created automatically if it does
 not exist, and all extracted fonts are placed there.
+====
+
+=== Extract with custom path composition
+
+For flexibility in path management, the API returns relative filenames when
+extracting to the current directory.
+
+This allows custom path composition with any directory structure.
+
+Syntax:
+
+[source,ruby]
+----
+filenames = ExtractTtc.extract(path) <1>
+full_paths = filenames.map { |filename| File.join(dir, filename) } <2>
+----
+<1> Extract to current directory, returns relative filenames.
+<2> Compose full paths with custom directory.
+
+Where,
+
+`path`:: The path to the input TrueType Collection file (`.ttc`).
+`dir`:: The custom directory to prepend to filenames.
+
+.Custom path composition with temporary directory
+[example]
+====
+[source,ruby]
+----
+require "extract_ttc"
+require "tmpdir"
+
+def extract_ttfs(ttc_path, tmp_dir)
+  # Extract returns relative filenames
+  filenames = ExtractTtc.extract(ttc_path)
+  # => ["Font_00.ttf", "Font_01.ttf", ...]
+
+  # Compose full paths with your directory
+  filenames.map do |filename|
+    File.join(tmp_dir, filename)
+  end
+  # => ["/tmp/xyz/Font_00.ttf", "/tmp/xyz/Font_01.ttf", ...]
+end
+
+# Use the method
+Dir.mktmpdir do |tmp_dir|
+  font_paths = extract_ttfs("fonts/MyFont.ttc", tmp_dir)
+
+  # Process fonts at their full paths
+  font_paths.each do |path|
+    puts "Font available at: #{path}"
+    # Your processing logic here
+  end
+end
+----
+
+This pattern is useful when you need to extract fonts to the current
+directory but want to manipulate them with absolute paths, or when
+integrating with code that expects to control the output directory.
+
+The relative filenames make it easy to move or organize the extracted
+files after extraction.
 ====
 
 
