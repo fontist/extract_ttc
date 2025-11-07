@@ -191,7 +191,7 @@ end
 
 # Print comparison
 def print_comparison(c_result, ruby_result)
-  puts "\n" + ("-" * 60)
+  puts "\n#{'-' * 60}"
   puts "Performance Comparison:".center(60)
   puts ("-" * 60)
 
@@ -210,7 +210,7 @@ def print_comparison(c_result, ruby_result)
 
     puts "\n  Ruby is #{format('%.2f', ratio)}x " \
          "#{ratio > 1 ? 'slower' : 'faster'} than C"
-    puts "  Difference: #{difference > 0 ? '+' : ''}" \
+    puts "  Difference: #{'+' if difference.positive?}" \
          "#{format_time(difference)} seconds per extraction"
 
     if ratio > 1
@@ -240,7 +240,7 @@ def run_benchmark
   ruby_result = benchmark_ruby_implementation(TEST_FILE, ITERATIONS)
 
   # Print results
-  puts "\n" + ("=" * 60)
+  puts "\n#{'=' * 60}"
   puts "Results".center(60)
   puts "=" * 60
 
@@ -249,7 +249,7 @@ def run_benchmark
 
   print_comparison(c_result, ruby_result)
 
-  puts "\n" + ("=" * 60)
+  puts "\n#{'=' * 60}"
   puts
 end
 

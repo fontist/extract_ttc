@@ -63,12 +63,14 @@ RSpec.describe ExtractTtc::Utilities::OutputPathGenerator do
       end
 
       it "handles directory without trailing slash" do
-        path = described_class.generate("Font.ttc", 2, output_dir: "/output/fonts")
+        path = described_class.generate("Font.ttc", 2,
+                                        output_dir: "/output/fonts")
         expect(path).to eq("/output/fonts/Font_02.ttf")
       end
 
       it "handles directory with trailing slash" do
-        path = described_class.generate("Font.ttc", 1, output_dir: "/output/fonts/")
+        path = described_class.generate("Font.ttc", 1,
+                                        output_dir: "/output/fonts/")
         expect(path).to eq("/output/fonts/Font_01.ttf")
       end
 
@@ -78,7 +80,8 @@ RSpec.describe ExtractTtc::Utilities::OutputPathGenerator do
       end
 
       it "handles nested directories" do
-        path = described_class.generate("Font.ttc", 0, output_dir: "output/subfolder/fonts")
+        path = described_class.generate("Font.ttc", 0,
+                                        output_dir: "output/subfolder/fonts")
         expect(path).to eq("output/subfolder/fonts/Font_00.ttf")
       end
 
@@ -153,17 +156,20 @@ RSpec.describe ExtractTtc::Utilities::OutputPathGenerator do
 
     context "with output directory" do
       it "generates path in specified directory with custom format" do
-        path = described_class.generate_with_format("Font.ttc", 5, "%03d", output_dir: "/tmp")
+        path = described_class.generate_with_format("Font.ttc", 5, "%03d",
+                                                    output_dir: "/tmp")
         expect(path).to eq("/tmp/Font_005.ttf")
       end
 
       it "handles nil output directory" do
-        path = described_class.generate_with_format("Font.ttc", 5, "%03d", output_dir: nil)
+        path = described_class.generate_with_format("Font.ttc", 5, "%03d",
+                                                    output_dir: nil)
         expect(path).to eq("Font_005.ttf")
       end
 
       it "handles empty output directory" do
-        path = described_class.generate_with_format("Font.ttc", 5, "%03d", output_dir: "")
+        path = described_class.generate_with_format("Font.ttc", 5, "%03d",
+                                                    output_dir: "")
         expect(path).to eq("Font_005.ttf")
       end
     end
@@ -198,13 +204,13 @@ RSpec.describe ExtractTtc::Utilities::OutputPathGenerator do
       paths = (0..5).map { |i| described_class.generate("Font.ttc", i) }
 
       expect(paths).to eq([
-        "Font_00.ttf",
-        "Font_01.ttf",
-        "Font_02.ttf",
-        "Font_03.ttf",
-        "Font_04.ttf",
-        "Font_05.ttf"
-      ])
+                            "Font_00.ttf",
+                            "Font_01.ttf",
+                            "Font_02.ttf",
+                            "Font_03.ttf",
+                            "Font_04.ttf",
+                            "Font_05.ttf",
+                          ])
     end
   end
 end

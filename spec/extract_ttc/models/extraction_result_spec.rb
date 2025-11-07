@@ -20,7 +20,7 @@ RSpec.describe ExtractTtc::Models::ExtractionResult do
         result = described_class.new(
           output_files: output_files,
           success: true,
-          errors: []
+          errors: [],
         )
 
         expect(result.output_files).to eq(output_files)
@@ -48,7 +48,7 @@ RSpec.describe ExtractTtc::Models::ExtractionResult do
         result = described_class.new(
           output_files: [],
           success: false,
-          errors: errors
+          errors: errors,
         )
 
         expect(result.output_files).to be_empty
@@ -59,7 +59,7 @@ RSpec.describe ExtractTtc::Models::ExtractionResult do
       it "accepts single error" do
         result = described_class.new(
           success: false,
-          errors: ["File not found"]
+          errors: ["File not found"],
         )
 
         expect(result.errors).to eq(["File not found"])
@@ -72,7 +72,7 @@ RSpec.describe ExtractTtc::Models::ExtractionResult do
       described_class.new(
         output_files: ["font_00.ttf", "font_01.ttf"],
         success: true,
-        errors: []
+        errors: [],
       )
     end
 
@@ -142,7 +142,7 @@ RSpec.describe ExtractTtc::Models::ExtractionResult do
       described_class.new(
         output_files: ["font_00.ttf"],
         success: true,
-        errors: []
+        errors: [],
       )
     end
 
@@ -192,7 +192,7 @@ RSpec.describe ExtractTtc::Models::ExtractionResult do
     it "preserves existing errors when adding new ones" do
       result_with_error = described_class.new(
         success: false,
-        errors: ["Existing error"]
+        errors: ["Existing error"],
       )
 
       new_result = result_with_error.add_error("New error")
@@ -206,7 +206,7 @@ RSpec.describe ExtractTtc::Models::ExtractionResult do
       described_class.new(
         output_files: ["font_00.ttf", "font_01.ttf"],
         success: true,
-        errors: []
+        errors: [],
       )
     end
 

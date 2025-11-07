@@ -45,7 +45,7 @@ module ExtractTtc
       def add_error(message)
         self.class.new(
           valid: false,
-          errors: @errors.dup << message
+          errors: @errors.dup << message,
         )
       end
     end

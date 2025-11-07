@@ -33,7 +33,10 @@ module ExtractTtc
     # @raise [Errno::ENOENT] if file does not exist
     # @raise [RuntimeError] if file format is invalid
     def self.from_file(path)
-      raise ArgumentError, "path cannot be nil or empty" if path.nil? || path.to_s.empty?
+      if path.nil? || path.to_s.empty?
+        raise ArgumentError,
+              "path cannot be nil or empty"
+      end
       raise Errno::ENOENT, "File not found: #{path}" unless File.exist?(path)
 
       File.open(path, "rb") { |io| read(io) }
@@ -61,8 +64,8 @@ module ExtractTtc
     #
     # @return [Boolean] true if the format is valid, false otherwise
     def valid?
-      tag == Constants::TTC_TAG && num_fonts > 0 && font_offsets.length == num_fonts
-    rescue
+      tag == Constants::TTC_TAG && num_fonts.positive? && font_offsets.length == num_fonts
+    rescue StandardError
       false
     end
 

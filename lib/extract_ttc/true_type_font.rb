@@ -42,7 +42,9 @@ module ExtractTtc
     endian :big
 
     offset_table :header
-    array :tables, type: :table_directory, initial_length: -> { header.num_tables }
+    array :tables, type: :table_directory, initial_length: -> {
+      header.num_tables
+    }
 
     # Table data is stored separately since it's at variable offsets
     attr_accessor :table_data
@@ -55,7 +57,10 @@ module ExtractTtc
     # @raise [Errno::ENOENT] if file does not exist
     # @raise [RuntimeError] if file format is invalid
     def self.from_file(path)
-      raise ArgumentError, "path cannot be nil or empty" if path.nil? || path.to_s.empty?
+      if path.nil? || path.to_s.empty?
+        raise ArgumentError,
+              "path cannot be nil or empty"
+      end
       raise Errno::ENOENT, "File not found: #{path}" unless File.exist?(path)
 
       File.open(path, "rb") do |io|
@@ -166,7 +171,7 @@ module ExtractTtc
       tables.each do |entry|
         io.write(entry.tag)
         io.write([entry.checksum].pack("N"))
-        io.write([0].pack("N"))  # Placeholder offset
+        io.write([0].pack("N")) # Placeholder offset
         io.write([entry.table_length].pack("N"))
       end
     end
@@ -188,7 +193,7 @@ module ExtractTtc
 
         # Add padding to align to 4-byte boundary
         padding = (Constants::TABLE_ALIGNMENT - (io.pos % Constants::TABLE_ALIGNMENT)) % Constants::TABLE_ALIGNMENT
-        io.write("\x00" * padding) if padding > 0
+        io.write("\x00" * padding) if padding.positive?
 
         # Zero out checksumAdjustment field in head table
         if entry.tag == Constants::HEAD_TAG

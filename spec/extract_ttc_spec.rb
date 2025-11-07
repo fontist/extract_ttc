@@ -52,7 +52,6 @@ RSpec.describe ExtractTtc do
         end
       end
     end
-
   end
 
   def fixture_path(filename)

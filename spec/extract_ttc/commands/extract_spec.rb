@@ -9,7 +9,7 @@ RSpec.describe ExtractTtc::ExtractCommand do
   let(:temp_dir) { Dir.mktmpdir }
 
   after do
-    FileUtils.rm_rf(temp_dir) if File.exist?(temp_dir)
+    FileUtils.rm_rf(temp_dir)
   end
 
   describe "#run" do
