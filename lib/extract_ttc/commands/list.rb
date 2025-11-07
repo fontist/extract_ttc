@@ -47,9 +47,9 @@ module ExtractTtc
       ttc.num_fonts.times do |index|
         output_name = Utilities::OutputPathGenerator.generate(
           file_path,
-          index
+          index,
         )
-        puts Paint["  #{index}.", :white] + " 📄 " + Paint[output_name, :yellow]
+        puts "#{Paint["  #{index}.", :white]} 📄 #{Paint[output_name, :yellow]}"
       end
     end
 

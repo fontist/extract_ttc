@@ -50,15 +50,18 @@ module ExtractTtc
       puts
       puts Paint["═══ Header ═══", :cyan, :bold]
       puts Paint["🏷️  Tag: ", :bold] + Paint[ttc.tag.to_s, :yellow]
-      puts Paint["📌 Version: ", :bold] + "#{ttc.major_version}.#{ttc.minor_version}" +
-           Paint[" (0x#{ttc.version.to_i.to_s(16).upcase})", :white]
-      puts Paint["🔢 Number of fonts: ", :bold] + Paint[ttc.num_fonts.to_s, :green]
+      puts Paint["📌 Version: ",
+                 :bold] + "#{ttc.major_version}.#{ttc.minor_version}" +
+        Paint[" (0x#{ttc.version.to_i.to_s(16).upcase})", :white]
+      puts Paint["🔢 Number of fonts: ",
+                 :bold] + Paint[ttc.num_fonts.to_s, :green]
       puts
       puts Paint["═══ Font Offsets ═══", :cyan, :bold]
       ttc.font_offsets.each_with_index do |offset, index|
-        puts Paint["  #{index}.", :white] + " " +
-             Paint["Offset: ", :bold] + offset.to_s.rjust(8) +
-             Paint[" (0x#{offset.to_i.to_s(16).upcase})", :white]
+        puts "#{Paint["  #{index}.",
+                      :white]} #{Paint['Offset: ',
+                                       :bold]}#{offset.to_s.rjust(8)}#{Paint[" (0x#{offset.to_i.to_s(16).upcase})",
+                                                                             :white]}"
       end
     end
 
@@ -72,18 +75,22 @@ module ExtractTtc
 
         puts
         puts Paint["📝 Font #{index}:", :magenta, :bold]
-        puts "  " + Paint["SFNT version: ", :bold] +
-             Paint["0x#{font.header.sfnt_version.to_i.to_s(16).upcase}", :cyan]
-        puts "  " + Paint["Number of tables: ", :bold] +
-             Paint[font.header.num_tables.to_s, :green]
-        puts "  " + Paint["Tables:", :bold]
+        puts "  #{Paint['SFNT version: ',
+                        :bold]}#{Paint["0x#{font.header.sfnt_version.to_i.to_s(16).upcase}",
+                                       :cyan]}"
+        puts "  #{Paint['Number of tables: ',
+                        :bold]}#{Paint[font.header.num_tables.to_s, :green]}"
+        puts "  #{Paint['Tables:', :bold]}"
 
         font.tables.each do |table|
           puts "    " + Paint["•", :yellow] + " " +
-               table.tag.to_s.ljust(8) +
-               Paint["checksum: ", :white] + Paint["0x#{table.checksum.to_i.to_s(16).upcase.rjust(8, '0')}", :cyan] +
-               Paint[" offset: ", :white] + table.offset.to_i.to_s.rjust(8) +
-               Paint[" length: ", :white] + Paint[table.table_length.to_i.to_s.rjust(8), :green]
+            table.tag.to_s.ljust(8) +
+            Paint["checksum: ",
+                  :white] + Paint["0x#{table.checksum.to_i.to_s(16).upcase.rjust(8, '0')}",
+                                  :cyan] +
+            Paint[" offset: ", :white] + table.offset.to_i.to_s.rjust(8) +
+            Paint[" length: ",
+                  :white] + Paint[table.table_length.to_i.to_s.rjust(8), :green]
         end
       end
     end
