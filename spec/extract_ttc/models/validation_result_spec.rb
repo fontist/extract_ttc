@@ -27,7 +27,7 @@ RSpec.describe ExtractTtc::Models::ValidationResult do
         errors = ["File not found", "Invalid format"]
         result = described_class.new(
           valid: false,
-          errors: errors
+          errors: errors,
         )
 
         expect(result.valid).to be false
@@ -37,7 +37,7 @@ RSpec.describe ExtractTtc::Models::ValidationResult do
       it "accepts single error" do
         result = described_class.new(
           valid: false,
-          errors: ["Invalid TTC tag"]
+          errors: ["Invalid TTC tag"],
         )
 
         expect(result.errors).to eq(["Invalid TTC tag"])
@@ -47,7 +47,7 @@ RSpec.describe ExtractTtc::Models::ValidationResult do
         errors = ["Error 1", "Error 2", "Error 3"]
         result = described_class.new(
           valid: false,
-          errors: errors
+          errors: errors,
         )
 
         expect(result.errors.size).to eq(3)
@@ -59,7 +59,7 @@ RSpec.describe ExtractTtc::Models::ValidationResult do
     let(:result) do
       described_class.new(
         valid: false,
-        errors: ["Error 1", "Error 2"]
+        errors: ["Error 1", "Error 2"],
       )
     end
 
@@ -160,7 +160,7 @@ RSpec.describe ExtractTtc::Models::ValidationResult do
     it "preserves existing errors when adding new ones" do
       result_with_error = described_class.new(
         valid: false,
-        errors: ["Existing error"]
+        errors: ["Existing error"],
       )
 
       new_result = result_with_error.add_error("New error")
@@ -182,7 +182,7 @@ RSpec.describe ExtractTtc::Models::ValidationResult do
     let(:result) do
       described_class.new(
         valid: false,
-        errors: ["Error 1", "Error 2"]
+        errors: ["Error 1", "Error 2"],
       )
     end
 
@@ -202,7 +202,8 @@ RSpec.describe ExtractTtc::Models::ValidationResult do
       result = result.add_error("Permission denied")
 
       expect(result.invalid?).to be true
-      expect(result.errors).to contain_exactly("File not found", "Permission denied")
+      expect(result.errors).to contain_exactly("File not found",
+                                               "Permission denied")
     end
 
     it "handles format validation errors" do

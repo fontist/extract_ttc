@@ -73,8 +73,8 @@ module ExtractTtc
     raise ReadFileError, "Could not open file: #{e.message}"
   rescue RuntimeError => e
     if e.message.include?("unexpected end of file") ||
-       e.message.include?("Invalid TTC") ||
-       e.message.include?("expected")
+        e.message.include?("Invalid TTC") ||
+        e.message.include?("expected")
       raise InvalidFileError, "File does not look like a ttc file"
     else
       raise InvalidFileError, "Invalid TTC file: #{e.message}"
@@ -116,7 +116,7 @@ module ExtractTtc
     Utilities::OutputPathGenerator.generate(
       input_path,
       index,
-      output_dir: configuration.output_directory
+      output_dir: configuration.output_directory,
     )
   end
 

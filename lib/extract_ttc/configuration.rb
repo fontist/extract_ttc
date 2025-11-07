@@ -89,9 +89,11 @@ module ExtractTtc
     def merge(options)
       self.class.new(
         output_directory: options.fetch(:output_directory, @output_directory),
-        overwrite_existing: options.fetch(:overwrite_existing, @overwrite_existing),
-        validate_checksums: options.fetch(:validate_checksums, @validate_checksums),
-        verbose: options.fetch(:verbose, @verbose)
+        overwrite_existing: options.fetch(:overwrite_existing,
+                                          @overwrite_existing),
+        validate_checksums: options.fetch(:validate_checksums,
+                                          @validate_checksums),
+        verbose: options.fetch(:verbose, @verbose),
       )
     end
 
@@ -117,7 +119,7 @@ module ExtractTtc
         output_directory: @output_directory,
         overwrite_existing: @overwrite_existing,
         validate_checksums: @validate_checksums,
-        verbose: @verbose
+        verbose: @verbose,
       }
     end
   end

@@ -48,7 +48,7 @@ module ExtractTtc
         self.class.new(
           output_files: @output_files.dup,
           success: false,
-          errors: @errors.dup << message
+          errors: @errors.dup << message,
         )
       end
     end

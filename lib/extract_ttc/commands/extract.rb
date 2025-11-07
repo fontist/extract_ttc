@@ -15,7 +15,7 @@ module ExtractTtc
 
       output_paths = ExtractTtc.extract(
         file_path,
-        output_dir: @options[:output_dir]
+        output_dir: @options[:output_dir],
       )
 
       display_results(output_paths)

@@ -45,7 +45,7 @@ RSpec.describe ExtractTtc::Configuration do
           output_directory: "/custom/path",
           overwrite_existing: true,
           validate_checksums: false,
-          verbose: true
+          verbose: true,
         )
 
         expect(config.output_directory).to eq("/custom/path")
@@ -81,7 +81,7 @@ RSpec.describe ExtractTtc::Configuration do
         output_directory: "/original",
         overwrite_existing: false,
         validate_checksums: true,
-        verbose: false
+        verbose: false,
       )
     end
 
@@ -104,7 +104,7 @@ RSpec.describe ExtractTtc::Configuration do
     it "merges multiple options" do
       new_config = original_config.merge(
         output_directory: "/new",
-        verbose: true
+        verbose: true,
       )
 
       expect(new_config.output_directory).to eq("/new")
@@ -118,7 +118,7 @@ RSpec.describe ExtractTtc::Configuration do
         output_directory: "/all_new",
         overwrite_existing: true,
         validate_checksums: false,
-        verbose: true
+        verbose: true,
       )
 
       expect(new_config.output_directory).to eq("/all_new")
@@ -132,7 +132,7 @@ RSpec.describe ExtractTtc::Configuration do
         output_directory: "/new",
         overwrite_existing: true,
         validate_checksums: false,
-        verbose: true
+        verbose: true,
       )
 
       expect(original_config.output_directory).to eq("/original")
@@ -168,7 +168,7 @@ RSpec.describe ExtractTtc::Configuration do
         output_directory: "/test",
         overwrite_existing: true,
         validate_checksums: false,
-        verbose: true
+        verbose: true,
       )
 
       hash = config.to_h
@@ -177,7 +177,7 @@ RSpec.describe ExtractTtc::Configuration do
         output_directory: "/test",
         overwrite_existing: true,
         validate_checksums: false,
-        verbose: true
+        verbose: true,
       )
     end
 
@@ -190,7 +190,7 @@ RSpec.describe ExtractTtc::Configuration do
         output_directory: ".",
         overwrite_existing: false,
         validate_checksums: true,
-        verbose: false
+        verbose: false,
       )
     end
 
@@ -256,7 +256,7 @@ RSpec.describe ExtractTtc::Configuration do
     it "supports creating default and customizing" do
       config = described_class.default.merge(
         output_directory: "/output",
-        verbose: true
+        verbose: true,
       )
 
       expect(config.output_directory).to eq("/output")

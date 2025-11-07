@@ -121,7 +121,7 @@ RSpec.describe ExtractTtc::Constants do
 
     it "is a power of 2" do
       alignment = described_class::TABLE_ALIGNMENT
-      expect((alignment & (alignment - 1))).to eq(0)
+      expect(alignment & (alignment - 1)).to eq(0)
     end
   end
 
@@ -150,7 +150,9 @@ RSpec.describe ExtractTtc::Constants do
     end
 
     it "cannot modify SUPPORTED_VERSIONS array" do
-      expect { described_class::SUPPORTED_VERSIONS << 999 }.to raise_error(FrozenError)
+      expect do
+        described_class::SUPPORTED_VERSIONS << 999
+      end.to raise_error(FrozenError)
     end
 
     it "raises error when trying to reassign constants" do
@@ -230,14 +232,14 @@ RSpec.describe ExtractTtc::Constants do
     end
 
     it "only defines expected constants" do
-      expected_constants = [
-        :TTC_TAG,
-        :TTC_VERSION_1,
-        :TTC_VERSION_2,
-        :HEAD_TAG,
-        :CHECKSUM_ADJUSTMENT_MAGIC,
-        :SUPPORTED_VERSIONS,
-        :TABLE_ALIGNMENT
+      expected_constants = %i[
+        TTC_TAG
+        TTC_VERSION_1
+        TTC_VERSION_2
+        HEAD_TAG
+        CHECKSUM_ADJUSTMENT_MAGIC
+        SUPPORTED_VERSIONS
+        TABLE_ALIGNMENT
       ]
 
       expect(described_class.constants(false).sort).to eq(expected_constants.sort)

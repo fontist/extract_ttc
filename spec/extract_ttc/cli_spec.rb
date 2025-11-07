@@ -10,7 +10,7 @@ RSpec.describe ExtractTtc::Cli do
   let(:temp_dir) { Dir.mktmpdir }
 
   after do
-    FileUtils.rm_rf(temp_dir) if File.exist?(temp_dir)
+    FileUtils.rm_rf(temp_dir)
   end
 
   describe "#extract" do
@@ -33,7 +33,7 @@ RSpec.describe ExtractTtc::Cli do
       described_class.start(["extract", fixture_path, "-o", temp_dir])
 
       expect(ExtractTtc::ExtractCommand).to have_received(:new).with(
-        hash_including("output_dir" => temp_dir)
+        hash_including("output_dir" => temp_dir),
       )
     end
 
@@ -45,7 +45,7 @@ RSpec.describe ExtractTtc::Cli do
       described_class.start(["extract", fixture_path, "-v"])
 
       expect(ExtractTtc::ExtractCommand).to have_received(:new).with(
-        hash_including("verbose" => true)
+        hash_including("verbose" => true),
       )
     end
 

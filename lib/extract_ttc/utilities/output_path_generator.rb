@@ -43,7 +43,10 @@ module ExtractTtc
       #   OutputPathGenerator.generate("Font.ttc", 15)
       #   # => "Font_15.ttf"
       def self.generate(input_path, font_index, output_dir: nil)
-        raise ArgumentError, "font_index must be non-negative" if font_index.negative?
+        if font_index.negative?
+          raise ArgumentError,
+                "font_index must be non-negative"
+        end
 
         basename = File.basename(input_path, ".*")
         formatted_index = sprintf(DEFAULT_INDEX_FORMAT, font_index)
@@ -75,8 +78,12 @@ module ExtractTtc
       # @example No padding
       #   OutputPathGenerator.generate_with_format("Font.ttc", 5, "%d")
       #   # => "Font_5.ttf"
-      def self.generate_with_format(input_path, font_index, index_format, output_dir: nil)
-        raise ArgumentError, "font_index must be non-negative" if font_index.negative?
+      def self.generate_with_format(input_path, font_index, index_format,
+output_dir: nil)
+        if font_index.negative?
+          raise ArgumentError,
+                "font_index must be non-negative"
+        end
 
         basename = File.basename(input_path, ".*")
         formatted_index = sprintf(index_format, font_index)
