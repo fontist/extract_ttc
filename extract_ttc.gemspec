@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "bindata", "~> 2.5"
+  spec.add_dependency "paint", "~> 2.0"
   spec.add_dependency "thor", "~> 1.4"
 
   spec.metadata["rubygems_mfa_required"] = "false"

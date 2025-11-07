@@ -16,6 +16,11 @@ require_relative "extract_ttc/models/validation_result"
 require_relative "extract_ttc/utilities/checksum_calculator"
 require_relative "extract_ttc/utilities/output_path_generator"
 
+# Command classes
+require_relative "extract_ttc/commands/extract"
+require_relative "extract_ttc/commands/list"
+require_relative "extract_ttc/commands/info"
+
 # Conditionally load CLI if Thor is available
 require_relative "extract_ttc/cli" if defined?(Thor)
 
